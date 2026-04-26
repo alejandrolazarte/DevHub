@@ -42,6 +42,7 @@ builder.Services.AddSingleton<IRepoCatalogService, EfRepoCatalogService>();
 builder.Services.AddSingleton<RepoStateStore>();
 builder.Services.AddSingleton<RepoScannerService>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<RepoScannerService>());
+builder.Services.AddHostedService<BackgroundFetchService>();
 builder.Services.AddSingleton<IProcessRunner, ProcessRunner>();
 builder.Services.AddSingleton<ServiceBusMapService>();
 

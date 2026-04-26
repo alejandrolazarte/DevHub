@@ -9,4 +9,5 @@ public interface IGitService
     Task<(bool Success, string Error)> CheckoutAsync(string repoPath, string branch, CancellationToken ct = default);
     Task<IReadOnlyList<string>> GetBranchesAsync(string repoPath, CancellationToken ct = default);
     bool IsGitRepo(string path);
+    Task<(bool Success, string Error)> FetchAsync(string repoPath, CancellationToken ct = default);
 }

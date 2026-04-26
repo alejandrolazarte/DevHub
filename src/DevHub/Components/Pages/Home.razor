@@ -91,7 +91,5 @@
         <MudText Typo="Typo.caption" Color="Color.Primary">@_selectedPaths.Count seleccionados</MudText>
         <MudText Typo="Typo.caption">⚠ @Store.Repos.Count(r => r.IsDirty) dirty</MudText>
         <MudText Typo="Typo.caption">↓ @Store.Repos.Count(r => r.BehindCount > 0) behind</MudText>
-        <MudSpacer />
-        <ScanCountdown />
     </MudStack>
 </MudPaper>

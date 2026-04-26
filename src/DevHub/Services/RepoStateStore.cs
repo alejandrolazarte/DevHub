@@ -33,4 +33,20 @@ public class RepoStateStore
         Interlocked.Exchange(ref _lastScanCompletedTicks, DateTime.UtcNow.Ticks);
         OnStateChanged?.Invoke();
     }
+
+    public void UpdateRepo(RepoInfo updated)
+    {
+        for (var i = 0; i < _repos.Length; i++)
+        {
+            if (_repos[i].Path != updated.Path)
+            {
+                continue;
+            }
+
+            _repos = _repos.SetItem(i, updated);
+            Interlocked.Exchange(ref _lastScanCompletedTicks, DateTime.UtcNow.Ticks);
+            OnStateChanged?.Invoke();
+            return;
+        }
+    }
 }

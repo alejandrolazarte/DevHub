@@ -108,6 +108,13 @@ public class GitCliService : IGitService
                      .ToList();
     }
 
+    public async Task<(bool Success, string Error)> FetchAsync(
+        string repoPath, CancellationToken ct = default)
+    {
+        var (_, error, exitCode) = await RunGitAsync(repoPath, ["fetch", "--all", "--quiet"], ct);
+        return (exitCode == 0, error);
+    }
+
     public async Task<(bool Success, string Error)> PullAsync(
         string repoPath, CancellationToken ct = default)
     {
@@ -180,6 +187,10 @@ public class GitCliService : IGitService
                 RemoteUrl = await remoteUrlTask,
                 LastScanned = DateTime.Now
             };
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
