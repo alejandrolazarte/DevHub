@@ -96,13 +96,12 @@ else
                         <th></th>
                     </tr>
 
-                    @foreach (var repo in group.Repos)
-                    {
+                    <Virtualize TItem="RepoInfo" Items="@((ICollection<RepoInfo>)group.Repos)" Context="repo" SpacerElement="tr" ItemSize="48">
                         <RepoRow Repo="repo"
                                  Selected="SelectedPaths.Contains(repo.Path)"
                                  SelectedChanged="v => OnRepoSelectionChanged(repo, v)"
                                  OnRemoveRequested="() => OnRemoveRequested.InvokeAsync(repo)" />
-                    }
+                    </Virtualize>
                 }
                 </tbody>
             }
