@@ -9,6 +9,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 {
     public DbSet<RepoCatalogEntry> RepoCatalogEntries => Set<RepoCatalogEntry>();
     public DbSet<GroupRule> GroupRules => Set<GroupRule>();
+    public DbSet<CustomRepoCommand> CustomRepoCommands => Set<CustomRepoCommand>();
+    public DbSet<HiddenAutoCommand> HiddenAutoCommands => Set<HiddenAutoCommand>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -36,6 +38,22 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .HasColumnType("TEXT")
                 .IsRequired()
                 .Metadata.SetValueComparer(prefixesComparer);
+        });
+
+        modelBuilder.Entity<CustomRepoCommand>(e =>
+        {
+            e.HasKey(c => c.Id);
+            e.Property(c => c.RepoPath).HasMaxLength(1024).IsRequired();
+            e.Property(c => c.Name).HasMaxLength(256).IsRequired();
+            e.Property(c => c.Command).HasMaxLength(1024).IsRequired();
+        });
+
+        modelBuilder.Entity<HiddenAutoCommand>(e =>
+        {
+            e.HasKey(h => h.Id);
+            e.Property(h => h.RepoPath).HasMaxLength(1024).IsRequired();
+            e.Property(h => h.Name).HasMaxLength(256).IsRequired();
+            e.HasIndex(h => new { h.RepoPath, h.Name }).IsUnique();
         });
     }
 }
