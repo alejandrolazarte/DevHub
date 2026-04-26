@@ -3,13 +3,11 @@
 @using DevHub.Components
 @using DevHub.Models
 @using DevHub.Services
-@using Microsoft.Extensions.Options
 @implements IDisposable
 @inject ISnackbar Snackbar
 @inject IRepoCatalogService RepoCatalog
 @inject RepoStateStore Store
 @inject RepoScannerService Scanner
-@inject IOptions<DevHubOptions> DevHubOptions
 
 <PageTitle>DevHub</PageTitle>
 
@@ -39,35 +37,20 @@
 </MudPaper>
 
 <MudPaper Class="pa-3 mb-2" Elevation="0" Style="background: var(--mud-palette-surface)">
-    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Wrap="Wrap.Wrap">
-        <MudTextField T="string"
-                      Value="_repoPathInput"
-                      ValueChanged="value => _repoPathInput = value"
-                      Label="Agregar repo por ruta"
-                      Placeholder="D:\repos\MyRepo"
-                      Variant="Variant.Outlined"
-                      Margin="Margin.Dense"
-                      Style="width: 480px; max-width: 100%;" />
+    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
         <MudButton Variant="Variant.Filled"
                    Color="Color.Primary"
-                   StartIcon="@Icons.Material.Filled.Add"
+                   StartIcon="@Icons.Material.Filled.FolderOpen"
                    Disabled="@_catalogBusy"
-                   OnClick="AddRepoAsync">
+                   OnClick="PickAndAddRepoAsync">
             Agregar repo
         </MudButton>
-        <MudTextField T="string"
-                      @bind-Value="_importRootPath"
-                      Label="Importar desde root"
-                      Placeholder="@DevHubOptions.Value.RootPath"
-                      Variant="Variant.Outlined"
-                      Margin="Margin.Dense"
-                      Style="width: 480px; max-width: 100%;" />
         <MudButton Variant="Variant.Outlined"
                    Color="Color.Secondary"
                    StartIcon="@Icons.Material.Filled.FolderCopy"
-                   Disabled="@(_catalogBusy || string.IsNullOrWhiteSpace(_importRootPath))"
-                   OnClick="ImportRootAsync">
-            Importar
+                   Disabled="@_catalogBusy"
+                   OnClick="PickAndImportRootAsync">
+            Importar desde root
         </MudButton>
     </MudStack>
 </MudPaper>

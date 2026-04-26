@@ -47,6 +47,7 @@ builder.Services.AddSingleton<IProcessRunner, ProcessRunner>();
 builder.Services.AddSingleton<ServiceBusMapService>();
 
 builder.Services.AddSingleton<IGroupRuleService, GroupRuleService>();
+builder.Services.AddSingleton<FolderPickerService>();
 
 builder.Services.Configure<SecretProfileOptions>(
     builder.Configuration.GetSection("SecretProfiles"));

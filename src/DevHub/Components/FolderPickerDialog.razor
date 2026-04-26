@@ -1,0 +1,78 @@
+@using DevHub.Services
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.FolderOpen" Class="mr-2" />
+            Seleccionar carpeta
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudStack Spacing="1">
+            <MudPaper Class="pa-2" Elevation="0" Style="background: var(--mud-palette-background)">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Wrap="Wrap.Wrap">
+                    <MudLink Color="Color.Primary" OnClick="NavigateToDrives">
+                        <MudIcon Icon="@Icons.Material.Filled.Computer" Size="Size.Small" Style="vertical-align:middle; margin-right:4px;" />
+                        Este equipo
+                    </MudLink>
+                    @foreach (var (segment, path) in GetBreadcrumbs())
+                    {
+                        <MudText Typo="Typo.caption">/</MudText>
+                        <MudLink Color="Color.Primary" OnClick="() => NavigateTo(path)">@segment</MudLink>
+                    }
+                </MudStack>
+            </MudPaper>
+
+            @if (!IsAtDrivesView)
+            {
+                <MudListItem T="string" Icon="@Icons.Material.Filled.ArrowUpward" OnClick="GoUp">
+                    ..
+                </MudListItem>
+            }
+
+            <MudList T="string" Dense="true" Style="max-height: 350px; overflow-y: auto;">
+                @if (IsAtDrivesView)
+                {
+                    @foreach (var drive in _drives)
+                    {
+                        <MudListItem T="string"
+                                     Icon="@Icons.Material.Filled.Storage"
+                                     IconColor="Color.Info"
+                                     OnClick="() => NavigateTo(drive)">
+                            @drive
+                        </MudListItem>
+                    }
+                }
+                else
+                {
+                    @foreach (var dir in _subDirs)
+                    {
+                        <MudListItem T="string"
+                                     Icon="@Icons.Material.Filled.Folder"
+                                     IconColor="Color.Warning"
+                                     OnClick="() => NavigateTo(dir)">
+                            @System.IO.Path.GetFileName(dir)
+                        </MudListItem>
+                    }
+                    @if (_subDirs.Count == 0)
+                    {
+                        <MudListItem T="string" Disabled="true">
+                            <MudText Typo="Typo.caption" Color="Color.Default">(carpeta vacía)</MudText>
+                        </MudListItem>
+                    }
+                }
+            </MudList>
+
+            <MudPaper Class="pa-2" Elevation="0" Style="background: var(--mud-palette-surface)">
+                <MudText Typo="Typo.caption" Color="Color.Primary">Seleccionada:</MudText>
+                <MudText Typo="Typo.body2">@(IsAtDrivesView ? "—" : _currentPath)</MudText>
+            </MudPaper>
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancelar</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Confirm" Disabled="@IsAtDrivesView">
+            Seleccionar esta carpeta
+        </MudButton>
+    </DialogActions>
+</MudDialog>
