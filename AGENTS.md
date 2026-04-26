@@ -1,123 +1,120 @@
-# AGENTS.md — Woffu Orchestra
+# AGENTS.md — DevHub
 
-Herramienta interna de desarrollo para el equipo de Woffu. Proyecto **local**, NO es un repo compartido. Corre como Windows Service en `http://localhost:5200`.
+Herramienta interna de desarrollo. Proyecto **local**, corre como Windows Service en `http://localhost:5200`.
 
 ## Propósito
 
-Dashboard para trabajar con los ~77 repos de Woffu (clonados en `C:\_O`) y herramientas auxiliares como el mapa de comunicación Service Bus entre microservicios.
+Dashboard para trabajar con múltiples repos git y herramientas auxiliares como el mapa de comunicación Service Bus entre microservicios.
 
 ## Stack
 
 - **.NET 10** · Blazor Server · `@rendermode InteractiveServer`
 - **MudBlazor 9.3.0** — SIEMPRE componentes MudBlazor, nunca HTML crudo para UI (excepto `<iframe>` o similares cuando no hay equivalente)
 - **Dark theme forzado** (primary `#c084fc`, background `#0f0f14`)
+- **EF Core** con SQLite (dev) o SQL Server (prod) via `IDbContextFactory<ApplicationDbContext>`
 - **xUnit + Moq** para tests
-- **PowerShell** para scripts auxiliares (viven en `scripts/`)
 
 ## Estructura
 
 ```
 woffu-orchestra/
-  scripts/                      ← PowerShell scripts (generadores, utilidades)
-  src/Woffu.Tools.RepoOrchestra/
-    Components/
-      Layout/                   ← MainLayout, NavMenu, ReconnectModal
-      Pages/                    ← una página por feature
-    Services/                   ← lógica de negocio, sin UI
-    Models/                     ← DTOs, options
-    Helpers/
-    wwwroot/
-      maps/                     ← HTMLs estáticos generados (no editar a mano)
-    Program.cs
-    appsettings.json
-  tests/Woffu.Tools.RepoOrchestra.U.Tests/
-    Services/
-      When_<Condicion>/
-        Then_<Resultado>.cs     ← un test por archivo
+  src/
+    DevHub/                       ← proyecto principal Blazor Server
+      Components/
+        Layout/                   ← MainLayout, NavMenu, ReconnectModal
+        Pages/                    ← una página por feature (solo markup + @inject)
+      Services/                   ← lógica de negocio, sin UI
+      Models/                     ← DTOs, options, entidades EF
+      Data/                       ← ApplicationDbContext
+      wwwroot/
+        maps/                     ← HTMLs estáticos generados (no editar a mano)
+      Program.cs
+      appsettings.json
+    DevHub.Analyzers/             ← Roslyn analyzers custom (DH001, etc.)
+  tests/
+    DevHub.U.Tests/
+      Services/
+        When_<Condicion>/
+          Then_<Resultado>.cs     ← un test por archivo
   docs/
-    plans/                      ← planes de implementación
+    plans/                        ← planes de implementación
 ```
 
 ## Convenciones
 
 ### C#
 - **Primary constructors siempre** — nunca constructor con cuerpo explícito
-- **Servicios como Singleton** salvo que tengan estado por request
+- **`IDbContextFactory<ApplicationDbContext>`** en servicios singleton — nunca inyectar `DbContext` directamente
 - **Records** para DTOs y resultados inmutables
 - `IProcessRunner` para cualquier ejecución de proceso externo (para testabilidad)
 - `IOptions<T>` para configuración desde `appsettings.json`
 - Namespaces file-scoped
+- `is null` / `is not null` — nunca `== null` / `!= null`
+- Braces obligatorios en todos los `if`/`else`/`for`/`foreach`
+
+### EF Core
+- FluentAPI únicamente en `OnModelCreating` — cero data annotations en entidades
+- Nombre de tabla por convención del `DbSet` (no setear `ToTable()` salvo excepción)
 
 ### Blazor
-- Cada página: `@rendermode InteractiveServer`
+- **Code-behind obligatorio**: lógica en `ComponentName.razor.cs`, el `.razor` solo markup y `@inject`
+- `@rendermode InteractiveServer` en cada página
 - UI con MudBlazor: `MudStack`, `MudButton`, `MudAlert`, `MudProgressLinear`, etc.
 - Icons: `Icons.Material.Filled.*`
-- Colores vía variables MudBlazor: `var(--mud-palette-primary)`, etc.
+
+### Analyzers activos (errores de compilación)
+| ID | Regla |
+|----|-------|
+| DH001 | `@code` en `.razor` — mover a `.razor.cs` |
+| IDE0041 | `== null` → `is null` |
+| IDE0270 | `!= null` → `is not null` |
+| IDE0011 | Braces obligatorios |
+| CA1305 | `IFormatProvider` en format strings |
+| CA1848 | `[LoggerMessage]` en lugar de `logger.Log*` directo |
 
 ### Tests
-Patrón obligatorio del proyecto:
+Patrón obligatorio:
 ```
 tests/.../Services/When_<Condicion>/Then_<Resultado>.cs
 ```
 - Una clase `When_*` por carpeta
-- Un método `[Fact] public async Task Execute()` por archivo
-- Mock de dependencias con `Moq`
-
-Correr antes de cada commit:
-```bash
-dotnet test
-```
+- Un método `[Fact] public async Task <Name>_Run()` por archivo
+- DB: SQLite in-memory (`Data Source=:memory:`) — nunca SQL Server en tests
+- Underscores permitidos solo en tests (CA1707 suprimido en `tests/**`)
 
 ### Commits
 - Formato `<type>: <description>` (feat, fix, docs, test, refactor, chore)
-- Commit pequeños y frecuentes — uno por paso lógico del plan
+- Commits pequeños y frecuentes
+- Todo entra por PR — `main` está protegido
+
+## CI
+
+GitHub Actions corre en cada PR:
+1. `dotnet build -warnaserror` — todos los analyzers tienen que pasar
+2. `dotnet test` — todos los tests tienen que pasar
 
 ## Features
 
 | Página | Ruta | Descripción |
 |--------|------|-------------|
-| Home | `/` | Lista de repos clonados en `C:\_O` con git status, filtros, bulk actions |
+| Home | `/` | Lista de repos con git status, filtros, bulk actions |
+| Settings | `/settings` | Group rules ABM, repo catalog |
+| Secret Profiles | `/secret-profiles` | Gestión de user secrets por servicio |
 | Service Bus Map | `/service-bus-map` | Mapa de comunicación MassTransit entre microservicios |
 
-## Agregar una nueva feature
-
-1. Crear `Services/MiFeatureService.cs` (primary constructor, usar `IProcessRunner` si ejecuta shell)
-2. Registrar en `Program.cs`: `builder.Services.AddSingleton<MiFeatureService>();`
-3. Si necesita config: crear options class + sección en `appsettings.json` + `builder.Services.Configure<T>(...)`
-4. Crear `Components/Pages/MiFeature.razor` con `@page "/mi-feature"` y `@rendermode InteractiveServer`
-5. Agregar NavLink en `Components/Layout/NavMenu.razor`
-6. Tests en `tests/.../Services/When_MiFeatureService_*/`
-
-## Servicios existentes (referencia)
+## Servicios existentes
 
 | Servicio | Propósito |
 |----------|-----------|
-| `GitCliService` | Wrapper de git.exe (GetStatus, Pull, Checkout, etc.) |
+| `GitCliService` | Wrapper de git (scan, pull, checkout) |
 | `RepoScannerService` | `BackgroundService` que escanea repos cada N segundos |
-| `RepoStateStore` | Estado thread-safe con evento `OnStateChanged` |
-| `VersionService` | Tracking de actualizaciones de versión |
+| `RepoStateStore` | Estado thread-safe con `volatile` + `ImmutableArray` |
+| `EfRepoCatalogService` | CRUD de repos en DB |
+| `GroupRuleService` | CRUD de reglas de agrupación en DB |
+| `SecretProfileService` | Gestión de perfiles de user secrets |
 | `IProcessRunner` / `ProcessRunner` | Ejecución de procesos externos (testeable) |
-| `ServiceBusMapService` | Genera el mapa de Service Bus via `generate-servicebus-map.ps1` |
-
-## Scripts
-
-Viven en `scripts/`. Se ejecutan desde el servicio correspondiente mediante `IProcessRunner`.
-
-| Script | Descripción |
-|--------|-------------|
-| `generate-servicebus-map.ps1` | Escanea `C:\_O\Woffu.Services.*` buscando `IntegrationEventHandler<T>` (consumers) y definiciones de `IntegrationEvent` en `*.IE.Publisher` (publishers); inyecta el JSON resultante en el template y genera `wwwroot/maps/servicebus-map.html` |
-
-## Configuración
-
-`appsettings.json` tiene una sección por módulo. Bindear con `builder.Services.Configure<MisOptions>(builder.Configuration.GetSection("MiModulo"))`.
-
-```json
-{
-  "RepoOrchestra":  { "RootPath": "C:\\_O", ... },
-  "ServiceBusMap":  { "ScriptPath": "...", "ReposRoot": "C:\\_O", ... }
-}
-```
+| `ServiceBusMapService` | Genera el mapa de Service Bus via PowerShell |
 
 ## Publish / Deploy
 
-El proyecto corre como Windows Service. Ver `install-service.ps1` y `publish.ps1`.
+Corre como Windows Service. Ver `install-service.ps1` y `publish.ps1`.
