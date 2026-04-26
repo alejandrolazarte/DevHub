@@ -8,8 +8,6 @@ namespace DevHub.Components.Pages;
 
 public partial class Settings
 {
-    private bool _catalogBusy;
-    private string _repoPathInput = string.Empty;
     private IReadOnlyList<RepoCatalogEntry> _catalogEntries = [];
     private List<GroupRule> _groupRules = [];
     private HashSet<GroupRule> _selectedRules = [];
@@ -30,57 +28,8 @@ public partial class Settings
         _groupRules = [.. await GroupRuleService.GetAllAsync()];
     }
 
-    private async Task AddRepoAsync()
-    {
-        if (string.IsNullOrWhiteSpace(_repoPathInput))
-        {
-            return;
-        }
-
-        _catalogBusy = true;
-        try
-        {
-            await RepoCatalog.AddAsync(_repoPathInput, CancellationToken.None);
-            _repoPathInput = string.Empty;
-            await LoadCatalogAsync();
-            Snackbar.Add("Repo added to catalog.", Severity.Success);
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
-        }
-        finally
-        {
-            _catalogBusy = false;
-        }
-    }
-
-    private async Task ImportRootAsync()
-    {
-        _catalogBusy = true;
-        try
-        {
-            var imported = await RepoCatalog.ImportFromRootAsync(DevHubOptions.Value.RootPath, CancellationToken.None);
-            await LoadCatalogAsync();
-            Snackbar.Add(
-                imported > 0
-                    ? $"Imported {imported} repos from root."
-                    : "No git repos were imported from the configured root.",
-                imported > 0 ? Severity.Success : Severity.Info);
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
-        }
-        finally
-        {
-            _catalogBusy = false;
-        }
-    }
-
     private async Task RemoveRepoAsync(string repoPath)
     {
-        _catalogBusy = true;
         try
         {
             await RepoCatalog.RemoveAsync(repoPath, CancellationToken.None);
@@ -90,10 +39,6 @@ public partial class Settings
         catch (Exception ex)
         {
             Snackbar.Add(ex.Message, Severity.Error);
-        }
-        finally
-        {
-            _catalogBusy = false;
         }
     }
 

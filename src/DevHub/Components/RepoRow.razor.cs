@@ -12,6 +12,7 @@ public partial class RepoRow
     [Parameter] public bool Selected { get; set; }
     [Parameter] public EventCallback<bool> SelectedChanged { get; set; }
     [Parameter] public EventCallback OnRemoveRequested { get; set; }
+    [Parameter] public EventCallback<RepoInfo> OnTerminalRequested { get; set; }
 
     private RepoInfo? _prevRepo;
     private bool _prevSelected;
@@ -80,11 +81,7 @@ public partial class RepoRow
         await JS.InvokeVoidAsync("window.open", Repo.PrUrl, "_blank");
     }
 
-    private async Task CopyPath()
-    {
-        await JS.InvokeVoidAsync("navigator.clipboard.writeText", Repo.Path);
-        Snackbar.Add($"Ruta copiada: {Repo.Path}", Severity.Info, cfg => cfg.VisibleStateDuration = 2000);
-    }
+    private Task OpenTerminal() => OnTerminalRequested.InvokeAsync(Repo);
 
     private Task RemoveFromCatalog()
     {

@@ -17,6 +17,8 @@ public partial class Home : IDisposable
     private IReadOnlyList<RepoInfo> _selectedRepos = [];
     private IReadOnlyList<string> _allGroups = [];
 
+    private RepoTerminalPanel _terminalPanel = default!;
+
     [Inject] IDialogService DialogService { get; set; } = default!;
 
     protected override void OnInitialized()
@@ -146,6 +148,9 @@ public partial class Home : IDisposable
         Snackbar.Add($"Repo quitado del catálogo: {repo.Name}", Severity.Info);
         await ManualRefresh();
     }
+
+    private Task OpenTerminalAsync(RepoInfo repo) =>
+        _terminalPanel.OpenForRepoAsync(repo);
 
     private void OnSelectAllChanged(bool selectAll)
     {

@@ -9,6 +9,7 @@ public partial class RepoList
     [Parameter] public HashSet<string> SelectedPaths { get; set; } = [];
     [Parameter] public EventCallback<HashSet<string>> SelectedPathsChanged { get; set; }
     [Parameter] public EventCallback<RepoInfo> OnRemoveRequested { get; set; }
+    [Parameter] public EventCallback<RepoInfo> OnTerminalRequested { get; set; }
 
     private readonly HashSet<string> _collapsedGroups = [];
     private readonly HashSet<string> _manuallyExpanded = [];

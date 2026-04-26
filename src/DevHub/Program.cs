@@ -48,6 +48,12 @@ builder.Services.AddSingleton<ServiceBusMapService>();
 
 builder.Services.AddSingleton<IGroupRuleService, GroupRuleService>();
 builder.Services.AddSingleton<FolderPickerService>();
+builder.Services.AddSingleton<ProjectTypeDetector>();
+builder.Services.AddSingleton<PackageJsonReader>();
+builder.Services.AddSingleton<CustomCommandService>();
+builder.Services.AddSingleton<HiddenCommandService>();
+builder.Services.AddSingleton<RepoCommandsService>();
+builder.Services.AddSingleton<IProcessStreamer, ProcessStreamer>();
 
 builder.Services.Configure<SecretProfileOptions>(
     builder.Configuration.GetSection("SecretProfiles"));
@@ -64,7 +70,7 @@ using (var scope = app.Services.CreateScope())
     try
     {
         await using var db = await dbFactory.CreateDbContextAsync();
-        await db.Database.EnsureCreatedAsync();
+        await db.Database.MigrateAsync();
         await SeedGroupRulesAsync(dbFactory, devHubOptions);
     }
     catch (Exception ex)

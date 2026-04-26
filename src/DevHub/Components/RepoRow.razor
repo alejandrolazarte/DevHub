@@ -106,11 +106,12 @@
                                    OnClick="OpenPullRequest" />
                 </MudTooltip>
             }
-            <MudTooltip Text="@($"Copiar ruta: {Repo.Path}")">
+            <MudTooltip Text="Comandos del repo">
                 <MudIconButton Icon="@Icons.Material.Filled.Terminal"
                                Size="Size.Small"
-                               aria-label="Copiar ruta del repo"
-                               OnClick="CopyPath" />
+                               Color="Color.Primary"
+                               aria-label="Abrir terminal"
+                               OnClick="OpenTerminal" />
             </MudTooltip>
             <MudTooltip Text="Quitar del catálogo">
                 <MudIconButton Icon="@Icons.Material.Filled.DeleteOutline"

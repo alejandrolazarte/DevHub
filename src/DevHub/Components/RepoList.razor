@@ -100,7 +100,8 @@ else
                         <RepoRow Repo="repo"
                                  Selected="SelectedPaths.Contains(repo.Path)"
                                  SelectedChanged="v => OnRepoSelectionChanged(repo, v)"
-                                 OnRemoveRequested="() => OnRemoveRequested.InvokeAsync(repo)" />
+                                 OnRemoveRequested="() => OnRemoveRequested.InvokeAsync(repo)"
+                                 OnTerminalRequested="OnTerminalRequested" />
                     </Virtualize>
                 }
                 </tbody>

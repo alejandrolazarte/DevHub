@@ -65,9 +65,12 @@
              OnOperationCompleted="ManualRefresh" />
 
 <RepoList Groups="_filteredGroups"
-          SelectedPaths="_selectedPaths"
-          SelectedPathsChanged="OnSelectedPathsChanged"
-          OnRemoveRequested="RemoveRepoAsync" />
+           SelectedPaths="_selectedPaths"
+           SelectedPathsChanged="OnSelectedPathsChanged"
+           OnRemoveRequested="RemoveRepoAsync"
+           OnTerminalRequested="OpenTerminalAsync" />
+
+<RepoTerminalPanel @ref="_terminalPanel" />
 
 <MudPaper Class="pa-2 mt-2" Elevation="0" Style="background: #0a0a0f">
     <MudStack Row="true" Spacing="3">
