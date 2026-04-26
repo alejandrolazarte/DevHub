@@ -12,6 +12,7 @@ public partial class Home : IDisposable
     private bool _catalogBusy;
     private FilterCriteria _filter = new(string.Empty, string.Empty, string.Empty);
     private string _repoPathInput = string.Empty;
+    private string _importRootPath = string.Empty;
     private HashSet<string> _selectedPaths = [];
     private IReadOnlyList<RepoGroup> _filteredGroups = [];
     private IReadOnlyList<RepoInfo> _filteredRepos = [];
@@ -25,6 +26,7 @@ public partial class Home : IDisposable
     {
         Store.OnStateChanged += OnStateChanged;
         _secondsUntilNextScan = DevHubOptions.Value.ScanIntervalSeconds;
+        _importRootPath = DevHubOptions.Value.RootPath;
         RefreshView();
         StartCountdown();
     }
@@ -114,8 +116,8 @@ public partial class Home : IDisposable
         _catalogBusy = true;
         try
         {
-            var imported = await RepoCatalog.ImportFromRootAsync(DevHubOptions.Value.RootPath, CancellationToken.None);
-            Snackbar.Add($"Importados {imported} repos desde {DevHubOptions.Value.RootPath}.",
+            var imported = await RepoCatalog.ImportFromRootAsync(_importRootPath, CancellationToken.None);
+            Snackbar.Add($"Importados {imported} repos desde {_importRootPath}.",
                 imported > 0 ? Severity.Success : Severity.Info);
             await ManualRefresh();
         }

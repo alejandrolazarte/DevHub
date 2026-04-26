@@ -47,6 +47,11 @@ builder.Services.AddSingleton<ServiceBusMapService>();
 
 builder.Services.AddSingleton<IGroupRuleService, GroupRuleService>();
 
+builder.Services.Configure<SecretProfileOptions>(
+    builder.Configuration.GetSection("SecretProfiles"));
+builder.Services.AddSingleton<IFileSystem, FileSystem>();
+builder.Services.AddSingleton<SecretProfileService>();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
