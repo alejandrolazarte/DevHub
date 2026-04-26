@@ -11,17 +11,17 @@ public partial class Home : IDisposable
 {
     private bool _catalogBusy;
     private FilterCriteria _filter = new(string.Empty, string.Empty, string.Empty);
-    private string _repoPathInput = string.Empty;
-    private string _importRootPath = string.Empty;
     private HashSet<string> _selectedPaths = [];
     private IReadOnlyList<RepoGroup> _filteredGroups = [];
     private IReadOnlyList<RepoInfo> _filteredRepos = [];
     private IReadOnlyList<RepoInfo> _selectedRepos = [];
     private IReadOnlyList<string> _allGroups = [];
+
+    [Inject] IDialogService DialogService { get; set; } = default!;
+
     protected override void OnInitialized()
     {
         Store.OnStateChanged += OnStateChanged;
-        _importRootPath = DevHubOptions.Value.RootPath;
         RefreshView();
     }
 
@@ -76,9 +76,10 @@ public partial class Home : IDisposable
         return Task.CompletedTask;
     }
 
-    private async Task AddRepoAsync()
+    private async Task PickAndAddRepoAsync()
     {
-        if (string.IsNullOrWhiteSpace(_repoPathInput))
+        var path = await OpenFolderPickerAsync();
+        if (path is null)
         {
             return;
         }
@@ -86,9 +87,8 @@ public partial class Home : IDisposable
         _catalogBusy = true;
         try
         {
-            await RepoCatalog.AddAsync(_repoPathInput, CancellationToken.None);
-            Snackbar.Add($"Repo agregado al catálogo: {_repoPathInput}", Severity.Success);
-            _repoPathInput = string.Empty;
+            await RepoCatalog.AddAsync(path, CancellationToken.None);
+            Snackbar.Add($"Repo agregado al catálogo: {path}", Severity.Success);
             await ManualRefresh();
         }
         catch (Exception ex)
@@ -101,13 +101,19 @@ public partial class Home : IDisposable
         }
     }
 
-    private async Task ImportRootAsync()
+    private async Task PickAndImportRootAsync()
     {
+        var path = await OpenFolderPickerAsync();
+        if (path is null)
+        {
+            return;
+        }
+
         _catalogBusy = true;
         try
         {
-            var imported = await RepoCatalog.ImportFromRootAsync(_importRootPath, CancellationToken.None);
-            Snackbar.Add($"Importados {imported} repos desde {_importRootPath}.",
+            var imported = await RepoCatalog.ImportFromRootAsync(path, CancellationToken.None);
+            Snackbar.Add($"Importados {imported} repos desde {path}.",
                 imported > 0 ? Severity.Success : Severity.Info);
             await ManualRefresh();
         }
@@ -119,6 +125,18 @@ public partial class Home : IDisposable
         {
             _catalogBusy = false;
         }
+    }
+
+    private async Task<string?> OpenFolderPickerAsync(string? initialPath = null)
+    {
+        var parameters = new DialogParameters<FolderPickerDialog>
+        {
+            { x => x.InitialPath, initialPath ?? string.Empty }
+        };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseOnEscapeKey = true };
+        var dialog = await DialogService.ShowAsync<FolderPickerDialog>("Seleccionar carpeta", parameters, options);
+        var result = await dialog.Result;
+        return result is { Canceled: false, Data: string path } ? path : null;
     }
 
     private async Task RemoveRepoAsync(RepoInfo repo)
