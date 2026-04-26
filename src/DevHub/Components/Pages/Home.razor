@@ -55,12 +55,19 @@
                    OnClick="AddRepoAsync">
             Agregar repo
         </MudButton>
+        <MudTextField T="string"
+                      @bind-Value="_importRootPath"
+                      Label="Importar desde root"
+                      Placeholder="@DevHubOptions.Value.RootPath"
+                      Variant="Variant.Outlined"
+                      Margin="Margin.Dense"
+                      Style="width: 480px; max-width: 100%;" />
         <MudButton Variant="Variant.Outlined"
                    Color="Color.Secondary"
                    StartIcon="@Icons.Material.Filled.FolderCopy"
-                   Disabled="@_catalogBusy"
+                   Disabled="@(_catalogBusy || string.IsNullOrWhiteSpace(_importRootPath))"
                    OnClick="ImportRootAsync">
-            Importar desde @DevHubOptions.Value.RootPath
+            Importar
         </MudButton>
     </MudStack>
 </MudPaper>
