@@ -72,6 +72,11 @@ dotnet test
 - Formato `<type>: <description>` (feat, fix, docs, test, refactor, chore)
 - Commit pequeños y frecuentes — uno por paso lógico del plan
 
+### Pull Requests
+- Si el cambio toca la UI, **siempre** incluir un screenshot en el cuerpo del PR.
+- Para tomar capturas usar Puppeteer headless desde este entorno, guardar en `docs/screenshots/` y referenciar con la URL raw de GitHub en el PR body.
+- Un PR por tipo de cambio: código en un PR, assets/screenshots en otro si aplica.
+
 ## Features
 
 | Página | Ruta | Descripción |
