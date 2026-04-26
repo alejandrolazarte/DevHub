@@ -11,6 +11,7 @@ public sealed class TempGitRepo : IDisposable
         Run("git init");
         Run("git config user.email test@test.com");
         Run("git config user.name Test");
+        Run("git config commit.gpgsign false");
         Run("git commit --allow-empty -m \"initial\"");
     }
 
@@ -69,6 +70,7 @@ public sealed class TempGitRepoAt : IDisposable
         Run("git init");
         Run("git config user.email test@test.com");
         Run("git config user.name Test");
+        Run("git config commit.gpgsign false");
         Run("git commit --allow-empty -m \"initial\"");
     }
 
