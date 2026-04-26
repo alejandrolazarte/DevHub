@@ -23,8 +23,7 @@ public class Then_repos_are_discovered
         var gitService = new GitCliService();
         var options = Options.Create(new DevHubOptions
         {
-            RootPath = rootPath,
-            ScanIntervalSeconds = 3600
+            RootPath = rootPath
         });
 
         var catalogMock = new Mock<IRepoCatalogService>();
