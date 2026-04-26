@@ -92,11 +92,6 @@
         <MudText Typo="Typo.caption">⚠ @Store.Repos.Count(r => r.IsDirty) dirty</MudText>
         <MudText Typo="Typo.caption">↓ @Store.Repos.Count(r => r.BehindCount > 0) behind</MudText>
         <MudSpacer />
-        @if (!Store.IsScanning)
-        {
-            <MudText Typo="Typo.caption" Color="Color.Default">
-                Auto-refresh en @_secondsUntilNextScan s
-            </MudText>
-        }
+        <ScanCountdown />
     </MudStack>
 </MudPaper>

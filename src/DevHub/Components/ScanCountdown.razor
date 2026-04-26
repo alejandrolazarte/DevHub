@@ -1,0 +1,12 @@
+@implements IDisposable
+@inject RepoStateStore Store
+@inject IOptions<DevHubOptions> DevHubOptions
+@using DevHub.Services
+@using Microsoft.Extensions.Options
+
+@if (!Store.IsScanning && _seconds > 0)
+{
+    <MudText Typo="Typo.caption" Color="Color.Default">
+        Auto-refresh en @_seconds s
+    </MudText>
+}

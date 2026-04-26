@@ -217,10 +217,21 @@ public class GitCliService : IGitService
             process.StartInfo.ArgumentList.Add(arg);
         }
 
+        using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        timeoutCts.CancelAfter(TimeSpan.FromSeconds(10));
+
         process.Start();
-        var output = await process.StandardOutput.ReadToEndAsync(ct);
-        var error = await process.StandardError.ReadToEndAsync(ct);
-        await process.WaitForExitAsync(ct);
-        return (output.Trim(), error.Trim(), process.ExitCode);
+        try
+        {
+            var output = await process.StandardOutput.ReadToEndAsync(timeoutCts.Token);
+            var error = await process.StandardError.ReadToEndAsync(timeoutCts.Token);
+            await process.WaitForExitAsync(timeoutCts.Token);
+            return (output.Trim(), error.Trim(), process.ExitCode);
+        }
+        catch (OperationCanceledException)
+        {
+            process.Kill(entireProcessTree: true);
+            throw;
+        }
     }
 }

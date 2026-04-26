@@ -13,6 +13,21 @@ public partial class RepoRow
     [Parameter] public EventCallback<bool> SelectedChanged { get; set; }
     [Parameter] public EventCallback OnRemoveRequested { get; set; }
 
+    private RepoInfo? _prevRepo;
+    private bool _prevSelected;
+
+    protected override bool ShouldRender()
+    {
+        if (Repo == _prevRepo && Selected == _prevSelected)
+        {
+            return false;
+        }
+
+        _prevRepo = Repo;
+        _prevSelected = Selected;
+        return true;
+    }
+
     private Color BranchColor => Repo.Branch is "master" or "main"
         ? Color.Success
         : Color.Warning;

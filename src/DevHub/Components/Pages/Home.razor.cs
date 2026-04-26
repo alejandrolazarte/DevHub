@@ -18,27 +18,17 @@ public partial class Home : IDisposable
     private IReadOnlyList<RepoInfo> _filteredRepos = [];
     private IReadOnlyList<RepoInfo> _selectedRepos = [];
     private IReadOnlyList<string> _allGroups = [];
-    private int _secondsUntilNextScan;
-    private PeriodicTimer? _countdownTimer;
-    private CancellationTokenSource? _countdownCts;
-
     protected override void OnInitialized()
     {
         Store.OnStateChanged += OnStateChanged;
-        _secondsUntilNextScan = DevHubOptions.Value.ScanIntervalSeconds;
         _importRootPath = DevHubOptions.Value.RootPath;
         RefreshView();
-        StartCountdown();
     }
 
     private void OnStateChanged()
     {
         RefreshView();
         InvokeAsync(StateHasChanged);
-        if (!Store.IsScanning)
-        {
-            _secondsUntilNextScan = DevHubOptions.Value.ScanIntervalSeconds;
-        }
     }
 
     private void RefreshView()
@@ -153,38 +143,9 @@ public partial class Home : IDisposable
         RefreshView();
     }
 
-    private void StartCountdown()
-    {
-        _countdownCts = new CancellationTokenSource();
-        _countdownTimer = new PeriodicTimer(TimeSpan.FromSeconds(1));
-        _ = RunCountdownAsync(_countdownTimer, _countdownCts.Token);
-    }
-
-    private async Task RunCountdownAsync(PeriodicTimer timer, CancellationToken ct)
-    {
-        try
-        {
-            while (await timer.WaitForNextTickAsync(ct))
-            {
-                if (_secondsUntilNextScan > 0)
-                {
-                    _secondsUntilNextScan--;
-                }
-                await InvokeAsync(StateHasChanged);
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            // Expected when cancellation is requested
-        }
-    }
-
     public void Dispose()
     {
         Store.OnStateChanged -= OnStateChanged;
-        _countdownCts?.Cancel();
-        _countdownCts?.Dispose();
-        _countdownTimer?.Dispose();
         GC.SuppressFinalize(this);
     }
 }
