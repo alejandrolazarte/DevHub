@@ -24,32 +24,9 @@
                 </MudChip>
             </MudStack>
 
-            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Wrap="Wrap.Wrap">
-                <MudTextField T="string"
-                              Value="_repoPathInput"
-                              ValueChanged="value => _repoPathInput = value"
-                              Label="Repo path"
-                              Placeholder="D:\\repos\\MyRepo"
-                              Variant="Variant.Outlined"
-                              Margin="Margin.Dense"
-                              Style="width: 480px; max-width: 100%;" />
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           StartIcon="@Icons.Material.Filled.Add"
-                           Disabled="@_catalogBusy"
-                           OnClick="AddRepoAsync">
-                    Add repo
-                </MudButton>
-                <MudButton Variant="Variant.Outlined"
-                           Color="Color.Secondary"
-                           StartIcon="@Icons.Material.Filled.FolderCopy"
-                           Disabled="@_catalogBusy"
-                           OnClick="ImportRootAsync">
-                    Import root
-                </MudButton>
+            <MudStack Row="true" Justify="Justify.FlexEnd">
                 <MudIconButton Icon="@Icons.Material.Filled.Refresh"
                                Color="Color.Default"
-                               Disabled="@_catalogBusy"
                                aria-label="Reload catalog"
                                OnClick="LoadCatalogAsync" />
             </MudStack>
@@ -78,7 +55,6 @@
                                 <MudIconButton Icon="@Icons.Material.Filled.DeleteOutline"
                                                Size="Size.Small"
                                                Color="Color.Default"
-                                               Disabled="@_catalogBusy"
                                                aria-label="Remove from catalog"
                                                OnClick="@(() => RemoveRepoAsync(context.Path))" />
                             </MudTooltip>
