@@ -1,0 +1,124 @@
+@using DevHub.Models
+@inject IJSRuntime JS
+@inject ISnackbar Snackbar
+
+<style>
+    .repo-data-row td {
+        padding: 3px 8px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        vertical-align: middle;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .repo-data-row:hover td {
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    .repo-name-cell {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .repo-commit-cell {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 0.75rem;
+        color: var(--mud-palette-text-secondary);
+    }
+</style>
+
+<tr class="repo-data-row">
+    <td>
+        <MudCheckBox T="bool"
+                     Value="Selected"
+                     ValueChanged="v => SelectedChanged.InvokeAsync(v)"
+                     Color="Color.Primary" />
+    </td>
+    <td class="repo-name-cell">
+        <MudText Typo="Typo.body2" Style="@($"font-weight: {(Repo.IsDirty ? "600" : "400")}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:block")">
+            @Repo.Name
+        </MudText>
+    </td>
+    <td>
+        @if (Repo.IsGitRepo)
+        {
+            <MudChip T="string" Size="Size.Small" Color="@BranchColor" Variant="Variant.Outlined">
+                @Repo.Branch
+            </MudChip>
+        }
+        else
+        {
+            <MudChip T="string" Size="Size.Small" Color="Color.Default">No git</MudChip>
+        }
+    </td>
+    <td>
+        @if (Repo.ScanError is not null)
+        {
+            <MudTooltip Text="@Repo.ScanError">
+                <MudChip T="string" Size="Size.Small" Color="Color.Error">Error</MudChip>
+            </MudTooltip>
+        }
+        else if (Repo.IsDirty)
+        {
+            <MudChip T="string" Size="Size.Small" Color="Color.Warning">
+                &#x26A0; @Repo.DirtyFileCount dirty
+            </MudChip>
+        }
+        else
+        {
+            <MudChip T="string" Size="Size.Small" Color="Color.Success">&#x2713; clean</MudChip>
+        }
+    </td>
+    <td>
+        <div style="display: flex; gap: 4px; align-items: center">
+            @if (Repo.AheadCount > 0)
+            {
+                <MudText Typo="Typo.caption" Color="Color.Success">&#x2191;@Repo.AheadCount</MudText>
+            }
+            @if (Repo.BehindCount > 0)
+            {
+                <MudText Typo="Typo.caption" Color="Color.Error">&#x2193;@Repo.BehindCount</MudText>
+            }
+            @if (Repo.AheadCount == 0 && Repo.BehindCount == 0)
+            {
+                <MudText Typo="Typo.caption" Color="Color.Default">—</MudText>
+            }
+        </div>
+    </td>
+    <td class="repo-commit-cell">
+        <MudTooltip Text="@BuildCommitTooltip()">
+            <span>@ToRelativeTime(Repo.LastCommitDate)</span>
+        </MudTooltip>
+    </td>
+    <td>
+        <div style="display:flex; align-items:center">
+            @if (Repo.PrUrl is not null)
+            {
+                <MudTooltip Text="Ver Pull Request en GitHub">
+                    <MudIconButton Icon="@Icons.Material.Filled.MergeType"
+                                   Size="Size.Small"
+                                   Color="Color.Warning"
+                                   aria-label="Ver Pull Request"
+                                   OnClick="OpenPullRequest" />
+                </MudTooltip>
+            }
+            <MudTooltip Text="@($"Copiar ruta: {Repo.Path}")">
+                <MudIconButton Icon="@Icons.Material.Filled.Terminal"
+                               Size="Size.Small"
+                               aria-label="Copiar ruta del repo"
+                               OnClick="CopyPath" />
+            </MudTooltip>
+            <MudTooltip Text="Quitar del catálogo">
+                <MudIconButton Icon="@Icons.Material.Filled.DeleteOutline"
+                               Size="Size.Small"
+                               Color="Color.Default"
+                               aria-label="Quitar del catálogo"
+                               OnClick="RemoveFromCatalog" />
+            </MudTooltip>
+        </div>
+    </td>
+</tr>

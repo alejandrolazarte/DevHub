@@ -1,0 +1,42 @@
+<MudPaper Class="pa-2 mb-2" Elevation="0" Style="background: var(--mud-palette-surface)">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Wrap="Wrap.Wrap">
+
+        <MudTextField T="string"
+                      Value="SearchText"
+                      Placeholder="Filtrar repos..."
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      Variant="Variant.Outlined"
+                      Margin="Margin.Dense"
+                      Style="width:200px"
+                      Immediate="true"
+                      ValueChanged="OnSearchChanged" />
+
+        <MudSelect T="string"
+                   Value="SelectedGroup"
+                   Variant="Variant.Outlined"
+                   Margin="Margin.Dense"
+                   Style="width:160px"
+                   ValueChanged="OnGroupChanged">
+            <MudSelectItem Value="@("")">Todos los grupos</MudSelectItem>
+            @foreach (var group in Groups)
+            {
+                <MudSelectItem Value="@group">@group</MudSelectItem>
+            }
+        </MudSelect>
+
+        <MudSelect T="string"
+                   Value="SelectedStatus"
+                   Variant="Variant.Outlined"
+                   Margin="Margin.Dense"
+                   Style="width:160px"
+                   ValueChanged="OnStatusChanged">
+            <MudSelectItem Value="@("")">Todos los estados</MudSelectItem>
+            <MudSelectItem Value="@("dirty")">&#x26A0; Dirty</MudSelectItem>
+            <MudSelectItem Value="@("clean")">&#x2713; Clean</MudSelectItem>
+            <MudSelectItem Value="@("behind")">&#x2193; Behind</MudSelectItem>
+            <MudSelectItem Value="@("feature")">&#x23B7; Feature branch</MudSelectItem>
+        </MudSelect>
+
+    </MudStack>
+</MudPaper>

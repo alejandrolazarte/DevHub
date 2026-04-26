@@ -1,0 +1,15 @@
+<Project>
+  <PropertyGroup>
+    <!-- Shared defaults for all projects -->
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Deterministic>true</Deterministic>
+    <LangVersion>preview</LangVersion>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Authors>Alejandro</Authors>
+    <Company>DevHub</Company>
+  </PropertyGroup>
+</Project>

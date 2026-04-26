@@ -1,0 +1,48 @@
+@inherits LayoutComponentBase
+
+<MudThemeProvider Theme="_theme" IsDarkMode="true" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudDrawer @bind-Open="_drawerOpen"
+               Variant="DrawerVariant.Mini"
+               OpenMiniOnHover="false"
+               ClipMode="DrawerClipMode.Always"
+               Elevation="1">
+        <MudDrawerHeader Class="pa-2" Style="min-height: 56px;">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="flex-grow-1">
+                <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                               Color="Color.Inherit"
+                               OnClick="ToggleDrawer"
+                               aria-label="Toggle menu" />
+                @if (_drawerOpen)
+                {
+                    <MudText Typo="Typo.subtitle1" Color="Color.Primary" Style="font-weight: 600;">
+                        DevHub
+                    </MudText>
+                }
+            </MudStack>
+        </MudDrawerHeader>
+
+        <MudNavMenu>
+            <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.FolderCopy">
+                Repos
+            </MudNavLink>
+            <MudNavLink Href="service-bus-map" Icon="@Icons.Material.Filled.Hub">
+                Service Bus Map
+            </MudNavLink>
+            <MudNavLink Href="secret-profiles" Icon="@Icons.Material.Filled.VpnKey">
+                Secret Profiles
+            </MudNavLink>
+            <MudNavLink Href="settings" Icon="@Icons.Material.Filled.Settings">
+                Settings
+            </MudNavLink>
+        </MudNavMenu>
+    </MudDrawer>
+
+    <MudMainContent Class="pa-4">
+        @Body
+    </MudMainContent>
+</MudLayout>

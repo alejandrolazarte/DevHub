@@ -1,0 +1,111 @@
+@using DevHub.Models
+
+<style>
+    .repo-table {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+    }
+
+    .repo-group-header-row {
+        background: #13131d;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .repo-group-header-row:hover {
+        background: #1a1a2e;
+    }
+
+    .repo-group-header-row td {
+        padding: 6px 12px;
+    }
+
+    .repo-col-header-row th {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+        color: var(--mud-palette-text-secondary);
+        font-weight: 500;
+        text-align: left;
+        letter-spacing: 0.04em;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+</style>
+
+@if (Groups.Count == 0)
+{
+    <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true" Class="mt-2">
+        No repos in the catalog yet. Add one by path or import from the configured root.
+    </MudAlert>
+}
+else
+{
+    <div style="overflow-x: auto">
+        <table class="repo-table">
+            <colgroup>
+                <col style="width: 48px">
+                <col>
+                <col style="width: 155px">
+                <col style="width: 115px">
+                <col style="width: 75px">
+                <col style="width: 260px">
+                <col style="width: 84px">
+            </colgroup>
+
+            @foreach (var group in Groups)
+            {
+                var isCollapsed = _collapsedGroups.Contains(group.Name);
+
+                <tbody>
+                <tr class="repo-group-header-row" @onclick="@(() => ToggleGroup(group.Name))">
+                    <td colspan="7">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <MudIcon Icon="@(isCollapsed ? Icons.Material.Filled.ChevronRight : Icons.Material.Filled.ExpandMore)"
+                                     Size="Size.Small" Color="Color.Default" />
+                            <MudChip T="string"
+                                     Size="Size.Small"
+                                     Color="@ColorHelper.FromGroupColor(group.Color)"
+                                     Variant="Variant.Outlined">
+                                @group.Name
+                            </MudChip>
+                            <span style="font-size:0.72rem;color:var(--mud-palette-text-secondary)">
+                                (@group.Repos.Count(r => SelectedPaths.Contains(r.Path))/@group.Repos.Count)
+                            </span>
+                            @if (group.AllClean && group.AllOnMaster)
+                            {
+                                <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Text">
+                                    todos clean · master
+                                </MudChip>
+                            }
+                        </div>
+                    </td>
+                </tr>
+
+                @if (!isCollapsed)
+                {
+                    <tr class="repo-col-header-row">
+                        <th></th>
+                        <th>Repositorio</th>
+                        <th>Rama</th>
+                        <th>Estado</th>
+                        <th>Commits</th>
+                        <th>Ultimo commit</th>
+                        <th></th>
+                    </tr>
+
+                    @foreach (var repo in group.Repos)
+                    {
+                        <RepoRow Repo="repo"
+                                 Selected="SelectedPaths.Contains(repo.Path)"
+                                 SelectedChanged="v => OnRepoSelectionChanged(repo, v)"
+                                 OnRemoveRequested="() => OnRemoveRequested.InvokeAsync(repo)" />
+                    }
+                }
+                </tbody>
+            }
+        </table>
+    </div>
+}

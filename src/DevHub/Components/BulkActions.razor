@@ -1,0 +1,107 @@
+@using DevHub.Models
+@using DevHub.Services
+@inject IGitService GitService
+@inject ISnackbar Snackbar
+
+<MudPaper Class="pa-2 mb-2" Elevation="0" Style="background: var(--mud-palette-surface)">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+
+        <MudCheckBox T="bool"
+                     Value="AllSelected"
+                     ValueChanged="OnSelectAllChanged"
+                     Color="Color.Primary"
+                     Label="Seleccionar todos" />
+
+        <MudSpacer />
+
+        <MudText Typo="Typo.caption" Color="Color.Primary">
+            @SelectedRepos.Count seleccionados
+        </MudText>
+
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Success"
+                   Size="Size.Small"
+                   StartIcon="@Icons.Material.Filled.Download"
+                   Disabled="@(!SelectedRepos.Any() || _busy)"
+                   OnClick="PullSelected">
+            Pull
+        </MudButton>
+
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Primary"
+                   Size="Size.Small"
+                   StartIcon="@Icons.Material.Filled.AccountTree"
+                   Disabled="@(!SelectedRepos.Any() || _busy)"
+                   OnClick="ShowCheckoutDialog">
+            Checkout
+        </MudButton>
+
+    </MudStack>
+</MudPaper>
+
+@if (_checkoutDialogVisible)
+{
+    <MudPaper Class="pa-3 mb-2" Elevation="2" Style="border: 1px solid rgba(192,132,252,0.2)">
+        <MudStack Spacing="2">
+
+            <!-- Ramas existentes -->
+            @if (_loadingBranches)
+            {
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Color="Color.Primary" />
+                    <MudText Typo="Typo.caption" Color="Color.Default">Cargando ramas...</MudText>
+                </MudStack>
+            }
+            else if (_existingBranches.Count > 0)
+            {
+                <MudText Typo="Typo.caption" Color="Color.Default" Style="letter-spacing:0.05em">
+                    RAMAS EXISTENTES
+                </MudText>
+                <div style="display:flex;flex-wrap:wrap;gap:6px">
+                    @foreach (var branch in _existingBranches)
+                    {
+                        var isSelected = _checkoutBranch == branch;
+                        var isMain = branch is "master" or "main";
+                        <MudChip T="string"
+                                 Size="Size.Small"
+                                 Color="@(isSelected ? Color.Primary : isMain ? Color.Success : Color.Default)"
+                                 Variant="@(isSelected ? Variant.Filled : Variant.Outlined)"
+                                 OnClick="@(() => SelectBranch(branch))"
+                                 Style="cursor:pointer">
+                            @branch
+                        </MudChip>
+                    }
+                </div>
+            }
+
+            <!-- Nueva rama -->
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                <MudTextField Value="_newBranchInput"
+                              ValueChanged="@((string v) => { _newBranchInput = v; if (!string.IsNullOrWhiteSpace(v)) _checkoutBranch = v; })"
+                              Label="O escribe una rama nueva"
+                              Placeholder="feature/12345"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Add"
+                              Style="width:260px" />
+
+                <MudButton Color="Color.Primary"
+                           Variant="Variant.Filled"
+                           Size="Size.Small"
+                           Disabled="@(string.IsNullOrWhiteSpace(_checkoutBranch))"
+                           OnClick="CheckoutSelected">
+                    Aplicar @(!string.IsNullOrWhiteSpace(_checkoutBranch) ? $"→ {_checkoutBranch}" : "")
+                </MudButton>
+
+                <MudButton Color="Color.Default"
+                           Variant="Variant.Text"
+                           Size="Size.Small"
+                           OnClick="CloseDialog">
+                    Cancelar
+                </MudButton>
+            </MudStack>
+
+        </MudStack>
+    </MudPaper>
+}

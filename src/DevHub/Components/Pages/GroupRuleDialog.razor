@@ -1,0 +1,27 @@
+@using DevHub.Models
+@using DevHub.Services
+@inject IGroupRuleService GroupRuleService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <MudStack Spacing="3" Class="pa-4">
+            <MudText Typo="Typo.h6">@(_editingRule?.Id == 0 ? "Add Rule" : "Edit Rule")</MudText>
+            <MudTextField T="string" Label="Name" @bind-Value="_editingRule!.Name" Required="true" />
+            <MudSelect T="string" Label="Color" @bind-Value="_editingRule!.Color" Required="true">
+                @foreach (var color in _availableColors)
+                {
+                    <MudSelectItem T="string" Value="color">@color</MudSelectItem>
+                }
+            </MudSelect>
+            <MudTextField T="string"
+                          Label="Prefixes (comma-separated)"
+                          @bind-Value="_prefixesInput"
+                          Placeholder="fw_, api_, web_" />
+            <MudStack Row="true" Justify="Justify.FlexEnd">
+                <MudButton Variant="Variant.Text" OnClick="Cancel">Cancel</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Save</MudButton>
+            </MudStack>
+        </MudStack>
+    </DialogContent>
+</MudDialog>

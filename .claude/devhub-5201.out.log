@@ -1,0 +1,144 @@
+info: DevHub.Services.RepoScannerService[0]
+      Scanning 0 repos
+info: DevHub.Services.RepoScannerService[0]
+      Scan complete
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://localhost:5201
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Production
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: D:\claude\woffu-orchestra\woffu-orchestra\src\DevHub
+info: DevHub.Services.RepoScannerService[0]
+      Scanning 0 repos
+info: DevHub.Services.RepoScannerService[0]
+      Scan complete
+warn: Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]
+      Failed to determine the https port for redirect.
+warn: Microsoft.AspNetCore.StaticAssets.StaticAssetsInvoker[17]
+      The application is not running against the published output and Static Web Assets are not enabled. To configure static web assets in other environments, call 'StaticWebAssetsLoader.UseStaticWebAssets(IWebHostEnvironment, IConfiguration)' to enable them.
+fail: Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.IO.FileNotFoundException: Could not find file 'D:\claude\woffu-orchestra\woffu-orchestra\src\DevHub\wwwroot\DevHub.styles.css'.
+      File name: 'D:\claude\woffu-orchestra\woffu-orchestra\src\DevHub\wwwroot\DevHub.styles.css'
+         at System.IO.FileInfo.get_Length()
+         at Microsoft.AspNetCore.Builder.StaticAssetDevelopmentRuntimeHandler.<>c__DisplayClass3_0.<<AttachRuntimePatching>b__0>d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Diagnostics.StatusCodePagesMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
+fail: Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.IO.FileNotFoundException: Could not find file 'D:\claude\woffu-orchestra\woffu-orchestra\src\DevHub\wwwroot\Components\Layout\ReconnectModal.razor.js'.
+      File name: 'D:\claude\woffu-orchestra\woffu-orchestra\src\DevHub\wwwroot\Components\Layout\ReconnectModal.razor.js'
+         at System.IO.FileInfo.get_Length()
+         at Microsoft.AspNetCore.Builder.StaticAssetDevelopmentRuntimeHandler.<>c__DisplayClass3_0.<<AttachRuntimePatching>b__0>d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Diagnostics.StatusCodePagesMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
+fail: Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.IO.FileNotFoundException: Could not find file 'D:\claude\woffu-orchestra\woffu-orchestra\src\DevHub\wwwroot\_content\MudBlazor\MudBlazor.min.css'.
+      File name: 'D:\claude\woffu-orchestra\woffu-orchestra\src\DevHub\wwwroot\_content\MudBlazor\MudBlazor.min.css'
+         at System.IO.FileInfo.get_Length()
+         at Microsoft.AspNetCore.Builder.StaticAssetDevelopmentRuntimeHandler.<>c__DisplayClass3_0.<<AttachRuntimePatching>b__0>d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Diagnostics.StatusCodePagesMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
+fail: Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.IO.FileNotFoundException: Could not find file 'D:\claude\woffu-orchestra\woffu-orchestra\src\DevHub\wwwroot\_framework\blazor.web.js'.
+      File name: 'D:\claude\woffu-orchestra\woffu-orchestra\src\DevHub\wwwroot\_framework\blazor.web.js'
+         at System.IO.FileInfo.get_Length()
+         at Microsoft.AspNetCore.Builder.StaticAssetDevelopmentRuntimeHandler.<>c__DisplayClass3_0.<<AttachRuntimePatching>b__0>d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Diagnostics.StatusCodePagesMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
+fail: Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.IO.FileNotFoundException: Could not find file 'D:\claude\woffu-orchestra\woffu-orchestra\src\DevHub\wwwroot\_content\MudBlazor\MudBlazor.min.js'.
+      File name: 'D:\claude\woffu-orchestra\woffu-orchestra\src\DevHub\wwwroot\_content\MudBlazor\MudBlazor.min.js'
+         at System.IO.FileInfo.get_Length()
+         at Microsoft.AspNetCore.Builder.StaticAssetDevelopmentRuntimeHandler.<>c__DisplayClass3_0.<<AttachRuntimePatching>b__0>d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Diagnostics.StatusCodePagesMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
+fail: Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.IO.FileNotFoundException: Could not find file 'D:\claude\woffu-orchestra\woffu-orchestra\src\DevHub\wwwroot\_content\BlazorMonaco\jsInterop.js'.
+      File name: 'D:\claude\woffu-orchestra\woffu-orchestra\src\DevHub\wwwroot\_content\BlazorMonaco\jsInterop.js'
+         at System.IO.FileInfo.get_Length()
+         at Microsoft.AspNetCore.Builder.StaticAssetDevelopmentRuntimeHandler.<>c__DisplayClass3_0.<<AttachRuntimePatching>b__0>d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Diagnostics.StatusCodePagesMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
+fail: Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.IO.FileNotFoundException: Could not find file 'D:\claude\woffu-orchestra\woffu-orchestra\src\DevHub\wwwroot\_content\BlazorMonaco\lib\monaco-editor\min\vs\editor\editor.main.js'.
+      File name: 'D:\claude\woffu-orchestra\woffu-orchestra\src\DevHub\wwwroot\_content\BlazorMonaco\lib\monaco-editor\min\vs\editor\editor.main.js'
+         at System.IO.FileInfo.get_Length()
+         at Microsoft.AspNetCore.Builder.StaticAssetDevelopmentRuntimeHandler.<>c__DisplayClass3_0.<<AttachRuntimePatching>b__0>d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Diagnostics.StatusCodePagesMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
+fail: Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.IO.FileNotFoundException: Could not find file 'D:\claude\woffu-orchestra\woffu-orchestra\src\DevHub\wwwroot\_content\BlazorMonaco\lib\monaco-editor\min\vs\loader.js'.
+      File name: 'D:\claude\woffu-orchestra\woffu-orchestra\src\DevHub\wwwroot\_content\BlazorMonaco\lib\monaco-editor\min\vs\loader.js'
+         at System.IO.FileInfo.get_Length()
+         at Microsoft.AspNetCore.Builder.StaticAssetDevelopmentRuntimeHandler.<>c__DisplayClass3_0.<<AttachRuntimePatching>b__0>d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Diagnostics.StatusCodePagesMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
+info: DevHub.Services.RepoScannerService[0]
+      Scanning 0 repos
+info: DevHub.Services.RepoScannerService[0]
+      Scan complete
+info: DevHub.Services.RepoScannerService[0]
+      Scanning 0 repos
+info: DevHub.Services.RepoScannerService[0]
+      Scan complete
+info: DevHub.Services.RepoScannerService[0]
+      Scanning 0 repos
+info: DevHub.Services.RepoScannerService[0]
+      Scan complete
+info: DevHub.Services.RepoScannerService[0]
+      Scanning 0 repos
+info: DevHub.Services.RepoScannerService[0]
+      Scan complete
+info: DevHub.Services.RepoScannerService[0]
+      Scanning 0 repos
+info: DevHub.Services.RepoScannerService[0]
+      Scan complete
+info: DevHub.Services.RepoScannerService[0]
+      Scanning 0 repos
+info: DevHub.Services.RepoScannerService[0]
+      Scan complete
+info: DevHub.Services.RepoScannerService[0]
+      Scanning 0 repos
+info: DevHub.Services.RepoScannerService[0]
+      Scan complete
+info: DevHub.Services.RepoScannerService[0]
+      Scanning 0 repos
+info: DevHub.Services.RepoScannerService[0]
+      Scan complete
+info: DevHub.Services.RepoScannerService[0]
+      Scanning 0 repos
+info: DevHub.Services.RepoScannerService[0]
+      Scan complete
+info: DevHub.Services.RepoScannerService[0]
+      Scanning 0 repos
+info: DevHub.Services.RepoScannerService[0]
+      Scan complete
+info: DevHub.Services.RepoScannerService[0]
+      Scanning 0 repos
+info: DevHub.Services.RepoScannerService[0]
+      Scan complete
+info: DevHub.Services.RepoScannerService[0]
+      Scanning 0 repos
+info: DevHub.Services.RepoScannerService[0]
+      Scan complete
+info: DevHub.Services.RepoScannerService[0]
+      Scanning 0 repos
+info: DevHub.Services.RepoScannerService[0]
+      Scan complete

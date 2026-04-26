@@ -1,0 +1,95 @@
+@page "/"
+@rendermode InteractiveServer
+@using DevHub.Components
+@using DevHub.Models
+@using DevHub.Services
+@using Microsoft.Extensions.Options
+@implements IDisposable
+@inject ISnackbar Snackbar
+@inject IRepoCatalogService RepoCatalog
+@inject RepoStateStore Store
+@inject RepoScannerService Scanner
+@inject IOptions<DevHubOptions> DevHubOptions
+
+<PageTitle>DevHub</PageTitle>
+
+<MudPaper Class="pa-3 mb-2" Elevation="1" Style="background: var(--mud-palette-surface)">
+    <MudStack Row="true" AlignItems="AlignItems.Center">
+        <MudText Typo="Typo.h6" Color="Color.Primary">DevHub</MudText>
+        <MudText Typo="Typo.caption" Color="Color.Default" Class="ml-2">
+            @_filteredGroups.Sum(g => g.Repos.Count) repos · catálogo local
+        </MudText>
+        <MudSpacer />
+        @if (Store.IsScanning)
+        {
+            <MudProgressCircular Size="Size.Small" Indeterminate="true" Color="Color.Primary" Class="mr-2" />
+        }
+        else
+        {
+            <MudText Typo="Typo.caption" Color="Color.Default">
+                Último scan: @(Store.LastScanCompleted == default ? "—" : Store.LastScanCompleted.ToString("HH:mm:ss"))
+            </MudText>
+        }
+        <MudIconButton Icon="@Icons.Material.Filled.Refresh"
+                       Color="Color.Primary"
+                       aria-label="Refresh"
+                       OnClick="ManualRefresh"
+                       Disabled="Store.IsScanning" />
+    </MudStack>
+</MudPaper>
+
+<MudPaper Class="pa-3 mb-2" Elevation="0" Style="background: var(--mud-palette-surface)">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Wrap="Wrap.Wrap">
+        <MudTextField T="string"
+                      Value="_repoPathInput"
+                      ValueChanged="value => _repoPathInput = value"
+                      Label="Agregar repo por ruta"
+                      Placeholder="D:\repos\MyRepo"
+                      Variant="Variant.Outlined"
+                      Margin="Margin.Dense"
+                      Style="width: 480px; max-width: 100%;" />
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   Disabled="@_catalogBusy"
+                   OnClick="AddRepoAsync">
+            Agregar repo
+        </MudButton>
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Secondary"
+                   StartIcon="@Icons.Material.Filled.FolderCopy"
+                   Disabled="@_catalogBusy"
+                   OnClick="ImportRootAsync">
+            Importar desde @DevHubOptions.Value.RootPath
+        </MudButton>
+    </MudStack>
+</MudPaper>
+
+<UpdateBanner />
+
+<FilterBar Groups="_allGroups" OnFilterChanged="ApplyFilter" />
+
+<BulkActions SelectedRepos="_selectedRepos"
+             AllRepos="_filteredRepos"
+             OnSelectAllChanged="OnSelectAllChanged"
+             OnOperationCompleted="ManualRefresh" />
+
+<RepoList Groups="_filteredGroups"
+          SelectedPaths="_selectedPaths"
+          SelectedPathsChanged="OnSelectedPathsChanged"
+          OnRemoveRequested="RemoveRepoAsync" />
+
+<MudPaper Class="pa-2 mt-2" Elevation="0" Style="background: #0a0a0f">
+    <MudStack Row="true" Spacing="3">
+        <MudText Typo="Typo.caption" Color="Color.Primary">@_selectedPaths.Count seleccionados</MudText>
+        <MudText Typo="Typo.caption">⚠ @Store.Repos.Count(r => r.IsDirty) dirty</MudText>
+        <MudText Typo="Typo.caption">↓ @Store.Repos.Count(r => r.BehindCount > 0) behind</MudText>
+        <MudSpacer />
+        @if (!Store.IsScanning)
+        {
+            <MudText Typo="Typo.caption" Color="Color.Default">
+                Auto-refresh en @_secondsUntilNextScan s
+            </MudText>
+        }
+    </MudStack>
+</MudPaper>

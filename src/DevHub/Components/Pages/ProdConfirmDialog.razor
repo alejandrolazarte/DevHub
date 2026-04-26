@@ -1,0 +1,26 @@
+<MudDialog>
+    <DialogContent>
+        <MudAlert Severity="Severity.Error" Icon="@Icons.Material.Filled.Warning" Class="mb-3">
+            <MudText Typo="Typo.subtitle1"><b>Estás a punto de aplicar un perfil de PRODUCCIÓN.</b></MudText>
+            <MudText Typo="Typo.body2">
+                Servicio: <b>@ServiceName</b> · Perfil: <b>@ProfileName</b>
+            </MudText>
+            <MudText Typo="Typo.body2" Class="mt-2">
+                Ejecutar tests o la API con estos secretos afectará datos reales.
+                Escribe el nombre del servicio para confirmar.
+            </MudText>
+        </MudAlert>
+        <MudTextField @bind-Value="Typed"
+                      Immediate="true"
+                      Label="@($"Escribe '{ServiceName}' para continuar")"
+                      Variant="Variant.Outlined" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancelar</MudButton>
+        <MudButton Color="Color.Error" Variant="Variant.Filled"
+                   Disabled="@(!string.Equals(Typed, ServiceName, StringComparison.Ordinal))"
+                   OnClick="Confirm">
+            Aplicar PROD
+        </MudButton>
+    </DialogActions>
+</MudDialog>

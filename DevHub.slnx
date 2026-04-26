@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/solutionItems/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="nuget.config" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/DevHub/DevHub.csproj" />
+    <Project Path="src/DevHub.Analyzers/DevHub.Analyzers.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DevHub.U.Tests/DevHub.U.Tests.csproj" />
+  </Folder>
+</Solution>

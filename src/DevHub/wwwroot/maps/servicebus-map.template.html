@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Woffu – Azure Service Bus Map</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    display: flex;
+    height: 100vh;
+    font-family: system-ui, -apple-system, sans-serif;
+    background: #0f1117;
+    color: #e0e0e0;
+    overflow: hidden;
+  }
+
+  /* ── Sidebar ──────────────────────────────────────────────────────────── */
+
+  #sidebar {
+    width: 270px;
+    min-width: 270px;
+    background: #1a1d27;
+    border-right: 1px solid #2a2d3a;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #sidebar-header {
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid #2a2d3a;
+  }
+
+  #sidebar-header h1 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #6b7a90;
+    margin-bottom: 2px;
+  }
+
+  #sidebar-header .generated-at {
+    font-size: 10px;
+    color: #3a4055;
+  }
+
+  #search {
+    margin: 10px 12px 4px;
+    padding: 7px 10px;
+    background: #252836;
+    border: 1px solid #3a3d4e;
+    border-radius: 6px;
+    color: #e0e0e0;
+    font-size: 13px;
+    outline: none;
+    width: calc(100% - 24px);
+  }
+
+  #search:focus { border-color: #5b8dee; }
+
+  #event-count {
+    font-size: 10px;
+    color: #3a4055;
+    padding: 2px 16px 6px;
+  }
+
+  #event-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2px 0;
+  }
+
+  #event-list::-webkit-scrollbar { width: 4px; }
+  #event-list::-webkit-scrollbar-thumb { background: #2e3245; border-radius: 2px; }
+
+  .event-item {
+    padding: 5px 16px;
+    font-size: 12px;
+    cursor: pointer;
+    color: #8b9db5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: background 0.1s;
+    border-left: 2px solid transparent;
+  }
+
+  .event-item:hover { background: #252836; color: #c8d0dc; }
+
+  .event-item.active {
+    background: #1a2d4a;
+    color: #5b8dee;
+    font-weight: 600;
+    border-left-color: #5b8dee;
+  }
+
+  /* ── Legend ───────────────────────────────────────────────────────────── */
+
+  #legend {
+    padding: 10px 16px 12px;
+    border-top: 1px solid #2a2d3a;
+    font-size: 11px;
+    color: #4a5068;
+  }
+
+  #legend .legend-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #3a4055;
+    margin-bottom: 6px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 3px;
+    color: #5a6480;
+  }
+
+  .legend-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── Graph ────────────────────────────────────────────────────────────── */
+
+  #cy { flex: 1; }
+
+  /* ── Info panel ───────────────────────────────────────────────────────── */
+
+  #info-panel {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    background: #1a1d27;
+    border: 1px solid #2a2d3a;
+    border-radius: 10px;
+    padding: 14px 16px;
+    max-width: 340px;
+    max-height: 240px;
+    overflow-y: auto;
+    font-size: 12px;
+    display: none;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    z-index: 10;
+  }
+
+  #info-panel::-webkit-scrollbar { width: 4px; }
+  #info-panel::-webkit-scrollbar-thumb { background: #2e3245; border-radius: 2px; }
+
+  #info-panel h3 {
+    color: #5b8dee;
+    margin-bottom: 10px;
+    font-size: 13px;
+    word-break: break-word;
+  }
+
+  .conn-row {
+    margin: 5px 0;
+    color: #aab2c0;
+    font-size: 12px;
+  }
+
+  .event-tag {
+    display: inline-block;
+    background: #1e2236;
+    border: 1px solid #3a3d4e;
+    border-radius: 4px;
+    padding: 2px 7px;
+    margin: 2px;
+    font-size: 11px;
+    color: #8b9db5;
+    cursor: pointer;
+    transition: background 0.1s, border-color 0.1s;
+  }
+
+  .event-tag:hover { background: #252836; color: #c8d0dc; border-color: #5a6480; }
+  .event-tag.active { background: #1a2d4a; color: #5b8dee; border-color: #5b8dee; }
+
+  /* ── Controls ─────────────────────────────────────────────────────────── */
+
+  #controls {
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+  }
+
+  .ctrl-btn {
+    background: #1a1d27;
+    border: 1px solid #2a2d3a;
+    color: #6b7a90;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.1s, color 0.1s;
+  }
+
+  .ctrl-btn:hover { background: #252836; color: #e0e0e0; }
+  .ctrl-btn.hidden { display: none; }
+
+  /* ── Hint ─────────────────────────────────────────────────────────────── */
+
+  #hint {
+    position: fixed;
+    top: 14px;
+    left: 284px;
+    color: #2e3245;
+    font-size: 11px;
+    pointer-events: none;
+    user-select: none;
+  }
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div id="sidebar-header">
+    <h1>Eventos de Integración</h1>
+    <div class="generated-at">Generado: __GENERATED_AT__</div>
+  </div>
+  <input type="text" id="search" placeholder="Buscar evento..." autocomplete="off">
+  <div id="event-count"></div>
+  <div id="event-list"></div>
+  <div id="legend">
+    <div class="legend-title">Roles</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#c0392b"></div>Legacy (monolito)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#2980b9"></div>Core / DiaryTracking</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#27ae60"></div>SignsV2 / SignalR</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#8e44ad"></div>Notifications / AuditTrail</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#e67e22"></div>BackOffice / Subscriptions</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#16a085"></div>Bulletin / Requests / Dashboard</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#7f8c8d"></div>Accounts / Reports / otros</div>
+  </div>
+</div>
+
+<div id="cy"></div>
+
+<div id="hint">
+  Click evento → resalta · Click flecha → ver eventos · Click fondo → limpiar
+</div>
+
+<div id="info-panel"></div>
+
+<div id="controls">
+  <button class="ctrl-btn hidden" id="reset-btn" onclick="resetHighlight()">✕ Limpiar</button>
+  <button class="ctrl-btn" onclick="cy.fit(undefined, 40)">⊡ Ajustar</button>
+</div>
+
+<script>
+// ─── Generated data ───────────────────────────────────────────────────────────
+
+const services = __SERVICES_JSON__;
+const rawEdges = __RAW_EDGES_JSON__;
+
+// ─── Role colors ──────────────────────────────────────────────────────────────
+
+const roleColors = {
+  monolith: '#c0392b',
+  core:     '#2980b9',
+  signs:    '#27ae60',
+  platform: '#8e44ad',
+  admin:    '#e67e22',
+  business: '#16a085',
+  support:  '#7f8c8d',
+};
+
+// ─── Cytoscape elements ───────────────────────────────────────────────────────
+
+const elements = [
+  ...services.map(s => ({
+    data: { id: s.id, label: s.id, role: s.role, color: roleColors[s.role] ?? '#7f8c8d' }
+  })),
+  ...rawEdges.map((e, i) => ({
+    data: {
+      id: `edge-${i}`,
+      source: e.pub,
+      target: e.con,
+      events: e.events,
+      label: String(e.events.length),
+    }
+  })),
+];
+
+// ─── Cytoscape init ───────────────────────────────────────────────────────────
+
+const cy = cytoscape({
+  container: document.getElementById('cy'),
+  elements,
+  style: [
+    {
+      selector: 'node',
+      style: {
+        'background-color': 'data(color)',
+        'label': 'data(label)',
+        'color': '#fff',
+        'text-valign': 'center',
+        'text-halign': 'center',
+        'font-size': '11px',
+        'font-weight': '700',
+        'width': 90,
+        'height': 36,
+        'shape': 'round-rectangle',
+        'text-wrap': 'wrap',
+        'text-max-width': '84px',
+        'border-width': 2,
+        'border-color': 'data(color)',
+        'border-opacity': 0.35,
+      },
+    },
+    {
+      selector: 'edge',
+      style: {
+        'width': 1.5,
+        'line-color': '#2e3348',
+        'target-arrow-color': '#2e3348',
+        'target-arrow-shape': 'triangle',
+        'curve-style': 'bezier',
+        'label': 'data(label)',
+        'font-size': '9px',
+        'color': '#3e4560',
+        'text-background-color': '#0f1117',
+        'text-background-opacity': 1,
+        'text-background-padding': '2px',
+        'text-rotation': 'autorotate',
+      },
+    },
+    {
+      selector: '.hl-edge',
+      style: {
+        'line-color': '#5b8dee',
+        'target-arrow-color': '#5b8dee',
+        'width': 3,
+        'color': '#5b8dee',
+      },
+    },
+    {
+      selector: '.hl-node',
+      style: {
+        'border-color': '#5b8dee',
+        'border-width': 3,
+        'border-opacity': 1,
+      },
+    },
+    {
+      selector: '.dim',
+      style: { 'opacity': 0.08 },
+    },
+  ],
+  layout: {
+    name: 'cose',
+    animate: false,
+    nodeRepulsion: 500000,
+    idealEdgeLength: 130,
+    edgeElasticity: 90,
+    gravity: 60,
+    numIter: 1000,
+    fit: true,
+    padding: 50,
+  },
+});
+
+// ─── All unique event names ───────────────────────────────────────────────────
+
+const allEvents = [...new Set(rawEdges.flatMap(e => e.events))].sort();
+
+// ─── Sidebar ──────────────────────────────────────────────────────────────────
+
+const searchEl     = document.getElementById('search');
+const eventListEl  = document.getElementById('event-list');
+const eventCountEl = document.getElementById('event-count');
+let   activeEvent  = null;
+
+function renderEventList(filter) {
+  const q        = (filter ?? '').toLowerCase();
+  const filtered = q ? allEvents.filter(e => e.toLowerCase().includes(q)) : allEvents;
+  eventCountEl.textContent = `${filtered.length} de ${allEvents.length} eventos`;
+  eventListEl.innerHTML = '';
+  filtered.forEach(name => {
+    const el = document.createElement('div');
+    el.className = 'event-item' + (name === activeEvent ? ' active' : '');
+    el.textContent = name;
+    el.title = name;
+    el.addEventListener('click', () => highlightEvent(name));
+    eventListEl.appendChild(el);
+  });
+}
+
+searchEl.addEventListener('input', e => renderEventList(e.target.value));
+renderEventList();
+
+// ─── Highlight logic ──────────────────────────────────────────────────────────
+
+const resetBtn  = document.getElementById('reset-btn');
+const infoPanel = document.getElementById('info-panel');
+
+function applyDimHighlight(matchEdges) {
+  cy.elements().addClass('dim').removeClass('hl-edge hl-node');
+  matchEdges.removeClass('dim').addClass('hl-edge');
+  matchEdges.connectedNodes().removeClass('dim').addClass('hl-node');
+}
+
+function highlightEvent(name) {
+  if (activeEvent === name) { resetHighlight(); return; }
+  activeEvent = name;
+  renderEventList(searchEl.value);
+  resetBtn.classList.remove('hidden');
+
+  const matchEdges = cy.edges().filter(e => e.data('events').includes(name));
+  applyDimHighlight(matchEdges);
+
+  let html = `<h3>📡 ${name}</h3>`;
+  matchEdges.forEach(e => {
+    const p  = e.data('source');
+    const c  = e.data('target');
+    const cp = roleColors[cy.$id(p).data('role')] ?? '#7f8c8d';
+    const cc = roleColors[cy.$id(c).data('role')] ?? '#7f8c8d';
+    html += `<div class="conn-row">
+      <span style="color:${cp}">■ ${p}</span>
+      <span style="color:#4a5068"> → </span>
+      <span style="color:${cc}">■ ${c}</span>
+    </div>`;
+  });
+  showInfoPanel(html);
+}
+
+function resetHighlight() {
+  activeEvent = null;
+  cy.elements().removeClass('dim hl-edge hl-node');
+  resetBtn.classList.add('hidden');
+  hideInfoPanel();
+  renderEventList(searchEl.value);
+}
+
+function showInfoPanel(html) {
+  infoPanel.innerHTML = html;
+  infoPanel.style.display = 'block';
+}
+
+function hideInfoPanel() {
+  infoPanel.style.display = 'none';
+  infoPanel.innerHTML = '';
+}
+
+// ─── Click on edge → show its events ─────────────────────────────────────────
+
+cy.on('tap', 'edge', evt => {
+  const edge   = evt.target;
+  const events = edge.data('events');
+  const src    = edge.data('source');
+  const tgt    = edge.data('target');
+  const cs     = roleColors[cy.$id(src).data('role')] ?? '#7f8c8d';
+  const ct     = roleColors[cy.$id(tgt).data('role')] ?? '#7f8c8d';
+
+  activeEvent = null;
+  applyDimHighlight(edge);
+  resetBtn.classList.remove('hidden');
+  renderEventList(searchEl.value);
+
+  let html = `<h3><span style="color:${cs}">■ ${src}</span><span style="color:#4a5068"> → </span><span style="color:${ct}">■ ${tgt}</span></h3>`;
+  events.forEach(name => {
+    const isActive = name === activeEvent;
+    html += `<span class="event-tag ${isActive ? 'active' : ''}"
+      onclick="highlightEvent('${name}')">${name}</span>`;
+  });
+  showInfoPanel(html);
+});
+
+// ─── Click on empty space → reset ────────────────────────────────────────────
+
+cy.on('tap', evt => {
+  if (evt.target === cy) resetHighlight();
+});
+</script>
+</body>
+</html>

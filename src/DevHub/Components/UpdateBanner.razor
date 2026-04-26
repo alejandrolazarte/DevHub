@@ -1,0 +1,30 @@
+@using DevHub.Services
+@inject VersionService VersionSvc
+@inject IJSRuntime JS
+
+@if (_visible)
+{
+    <MudAlert Severity="Severity.Success"
+              Variant="Variant.Filled"
+              Class="mb-2"
+              Style="background: linear-gradient(90deg, #16a34a, #15803d); cursor:default"
+              ShowCloseIcon="true"
+              CloseIconClicked="Dismiss">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+            <MudText Typo="Typo.body2">
+                ✨ Actualizado a <strong>v@(VersionSvc.Current)</strong>
+                @if (VersionSvc.PreviousVersion is not null)
+                {
+                    <span style="opacity:0.8"> · antes v@(VersionSvc.PreviousVersion)</span>
+                }
+            </MudText>
+            <MudButton Size="Size.Small"
+                       Variant="Variant.Outlined"
+                       Color="Color.Inherit"
+                       Style="border-color:rgba(255,255,255,0.6);color:white"
+                       OnClick="Relaunch">
+                Relaunch
+            </MudButton>
+        </MudStack>
+    </MudAlert>
+}

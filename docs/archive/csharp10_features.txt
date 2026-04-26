@@ -1,0 +1,67 @@
+C# 10 New Features
+
+Record Structs
+C# 10 introduces record structs, allowing value types to have the same concise syntax as record classes. Record structs support both readonly and mutable variants. A readonly record struct guarantees immutability at the struct level, while a regular record struct allows mutable properties.
+
+Example:
+public readonly record struct Point(double X, double Y);
+public record struct Measurement(double Value, string Unit);
+
+Global Using Directives
+With global using directives, you can declare a using statement once and have it apply to all files in the project. This reduces repetitive using statements across files and is ideal for commonly used namespaces like System, System.Collections.Generic, or System.Linq.
+
+Example:
+global using System;
+global using System.Collections.Generic;
+
+File-Scoped Namespace Declarations
+C# 10 allows a more concise namespace declaration that applies to the entire file without requiring extra indentation. Instead of wrapping all code in a block, you simply declare the namespace at the top followed by a semicolon.
+
+Example:
+namespace MyApplication.Services;
+
+public class UserService { }
+
+Extended Property Patterns
+Property patterns in C# 10 can now be extended to access nested members more concisely. Instead of nesting multiple property pattern levels, you can use dot notation to reach deeply nested properties in a single pattern.
+
+Example:
+if (order is { Customer.Address.Country: "Spain" })
+    ApplyDiscount(order);
+
+Lambda Improvements
+C# 10 brings several improvements to lambda expressions. Lambdas can now have explicit return types, natural types (allowing var inference), and can apply attributes. This makes lambdas more powerful and expressive.
+
+Example:
+var square = int (int x) => x * x;
+var parse = [DebuggerStepThrough] (string s) => int.Parse(s);
+
+Constant Interpolated Strings
+String interpolation can now be used in constant expressions, as long as all placeholders are also constants. This was a long-requested feature that allows building constant strings from other constant string components.
+
+Example:
+const string Greeting = "Hello";
+const string Message = $"{Greeting}, World!";
+
+CallerArgumentExpression Attribute
+A new attribute CallerArgumentExpression allows capturing the expression passed to a parameter as a string. This is especially useful for writing assertion or validation methods that include the original expression in their error messages.
+
+Example:
+public static void Validate(bool condition, [CallerArgumentExpression("condition")] string expression = "")
+{
+    if (!condition)
+        throw new ArgumentException($"Condition failed: {expression}");
+}
+
+Improved Definite Assignment
+The compiler in C# 10 has improved analysis for definite assignment, reducing false positives in cases involving complex boolean expressions. Code that was previously flagged as potentially unassigned now correctly compiles without warnings.
+
+Deconstruction in Mixed Declarations
+C# 10 allows mixing new variable declarations and existing variables in deconstruction assignments. Previously, all variables in a deconstruction had to be either all new or all existing.
+
+Example:
+int x = 0;
+(x, int y) = GetCoordinates();
+
+AsyncMethodBuilder Override
+Individual methods can now override the default async method builder using the AsyncMethodBuilder attribute at the method level, enabling fine-grained control over async state machine behavior without affecting the entire class or assembly.

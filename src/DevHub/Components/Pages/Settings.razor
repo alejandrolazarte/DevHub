@@ -1,0 +1,196 @@
+@page "/settings"
+@rendermode InteractiveServer
+@using DevHub.Models
+@using DevHub.Services
+@using Microsoft.Extensions.Options
+@inject IOptions<DevHubOptions> DevHubOptions
+@inject ISnackbar Snackbar
+@inject IRepoCatalogService RepoCatalog
+@inject IGroupRuleService GroupRuleService
+@inject IDialogService DialogService
+
+<PageTitle>Settings - DevHub</PageTitle>
+
+<MudStack Spacing="3">
+    <MudText Typo="Typo.h5" Color="Color.Primary">Settings</MudText>
+
+    <MudPaper Class="pa-4" Elevation="1">
+        <MudStack Spacing="2">
+            <MudStack Row="true" AlignItems="AlignItems.Center">
+                <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Catalog</MudText>
+                <MudSpacer />
+                <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined">
+                    @_catalogEntries.Count repos
+                </MudChip>
+            </MudStack>
+
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Wrap="Wrap.Wrap">
+                <MudTextField T="string"
+                              Value="_repoPathInput"
+                              ValueChanged="value => _repoPathInput = value"
+                              Label="Repo path"
+                              Placeholder="D:\\repos\\MyRepo"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Style="width: 480px; max-width: 100%;" />
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           Disabled="@_catalogBusy"
+                           OnClick="AddRepoAsync">
+                    Add repo
+                </MudButton>
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Secondary"
+                           StartIcon="@Icons.Material.Filled.FolderCopy"
+                           Disabled="@_catalogBusy"
+                           OnClick="ImportRootAsync">
+                    Import root
+                </MudButton>
+                <MudIconButton Icon="@Icons.Material.Filled.Refresh"
+                               Color="Color.Default"
+                               Disabled="@_catalogBusy"
+                               aria-label="Reload catalog"
+                               OnClick="LoadCatalogAsync" />
+            </MudStack>
+
+            @if (_catalogEntries.Count == 0)
+            {
+                <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true">
+                    The persistent catalog is empty.
+                </MudAlert>
+            }
+            else
+            {
+                <MudTable Items="_catalogEntries" Dense="true" Hover="true" Elevation="0">
+                    <HeaderContent>
+                        <MudTh>Path</MudTh>
+                        <MudTh>Added (UTC)</MudTh>
+                        <MudTh></MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Path">
+                            <MudText Typo="Typo.body2">@context.Path</MudText>
+                        </MudTd>
+                        <MudTd DataLabel="Added">@context.AddedUtc.ToString("yyyy-MM-dd HH:mm:ss")</MudTd>
+                        <MudTd>
+                            <MudTooltip Text="Remove from catalog">
+                                <MudIconButton Icon="@Icons.Material.Filled.DeleteOutline"
+                                               Size="Size.Small"
+                                               Color="Color.Default"
+                                               Disabled="@_catalogBusy"
+                                               aria-label="Remove from catalog"
+                                               OnClick="@(() => RemoveRepoAsync(context.Path))" />
+                            </MudTooltip>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            }
+        </MudStack>
+    </MudPaper>
+
+    <MudPaper Class="pa-4" Elevation="1">
+        <MudStack Spacing="2">
+            <MudText Typo="Typo.subtitle2" Color="Color.Secondary">General</MudText>
+            <MudGrid>
+                <MudItem xs="12" sm="4"><MudText Typo="Typo.body2">Seed Root Path</MudText></MudItem>
+                <MudItem xs="12" sm="8"><MudText Typo="Typo.body2">@DevHubOptions.Value.RootPath</MudText></MudItem>
+
+                <MudItem xs="12" sm="4"><MudText Typo="Typo.body2">Catalog DB</MudText></MudItem>
+                <MudItem xs="12" sm="8"><MudText Typo="Typo.body2">@RepoCatalog.GetDisplayConnectionString()</MudText></MudItem>
+
+                <MudItem xs="12" sm="4"><MudText Typo="Typo.body2">Scan Interval</MudText></MudItem>
+                <MudItem xs="12" sm="8"><MudText Typo="Typo.body2">@DevHubOptions.Value.ScanIntervalSeconds s</MudText></MudItem>
+
+                <MudItem xs="12" sm="4"><MudText Typo="Typo.body2">Parallel Degree</MudText></MudItem>
+                <MudItem xs="12" sm="8"><MudText Typo="Typo.body2">@DevHubOptions.Value.ParallelScanDegree</MudText></MudItem>
+
+                <MudItem xs="12" sm="4"><MudText Typo="Typo.body2">Default Group</MudText></MudItem>
+                <MudItem xs="12" sm="8"><MudText Typo="Typo.body2">@DevHubOptions.Value.DefaultGroup</MudText></MudItem>
+            </MudGrid>
+        </MudStack>
+    </MudPaper>
+
+    <MudPaper Class="pa-4" Elevation="1">
+        <MudStack Spacing="2">
+            <MudStack Row="true" AlignItems="AlignItems.Center">
+                <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Group Rules</MudText>
+                <MudSpacer />
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Size="Size.Small"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           OnClick="OpenCreateDialog">
+                    Add rule
+                </MudButton>
+            </MudStack>
+
+            @if (_groupRules.Count == 0)
+            {
+                <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true">
+                    No group rules defined. Use the <i>Default Group</i> for unmatched repos.
+                </MudAlert>
+            }
+            else
+            {
+                <MudTable Items="_groupRules" Dense="true" Hover="true" Elevation="0" MultiSelection="true" @bind-SelectedItems="_selectedRules">
+                    <HeaderContent>
+                        <MudTh>#</MudTh>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Color</MudTh>
+                        <MudTh>Prefixes</MudTh>
+                        <MudTh></MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="#">@context.Order</MudTd>
+                        <MudTd>
+                            <MudChip T="string" Size="Size.Small" Color="@ColorHelper.FromGroupColor(context.Color)" Variant="Variant.Outlined">
+                                @context.Name
+                            </MudChip>
+                        </MudTd>
+                        <MudTd>@context.Color</MudTd>
+                        <MudTd>@string.Join(", ", context.Prefixes)</MudTd>
+                        <MudTd>
+                            <MudStack Row="true" Spacing="1">
+                                <MudTooltip Text="Edit">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                                   Size="Size.Small"
+                                                   Color="Color.Default"
+                                                   aria-label="Edit rule"
+                                                   OnClick="@(() => OpenEditDialog(context))" />
+                                </MudTooltip>
+                                <MudTooltip Text="Delete">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                                   Size="Size.Small"
+                                                   Color="Color.Default"
+                                                   aria-label="Delete rule"
+                                                   OnClick="@(() => DeleteRuleAsync(context.Id))" />
+                                </MudTooltip>
+                            </MudStack>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            }
+
+            @if (_selectedRules.Count > 0)
+            {
+                <MudStack Row="true">
+                    <MudButton Variant="Variant.Outlined"
+                               Size="Size.Small"
+                               Color="Color.Secondary"
+                               StartIcon="@Icons.Material.Filled.ArrowUpward"
+                               OnClick="MoveSelectedUpAsync">
+                        Move up
+                    </MudButton>
+                    <MudButton Variant="Variant.Outlined"
+                               Size="Size.Small"
+                               Color="Color.Secondary"
+                               StartIcon="@Icons.Material.Filled.ArrowDownward"
+                               OnClick="MoveSelectedDownAsync">
+                        Move down
+                    </MudButton>
+                </MudStack>
+            }
+        </MudStack>
+    </MudPaper>
+</MudStack>

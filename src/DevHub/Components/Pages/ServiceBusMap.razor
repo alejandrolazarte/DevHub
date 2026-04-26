@@ -1,0 +1,57 @@
+@page "/service-bus-map"
+@rendermode InteractiveServer
+@using DevHub.Services
+@inject ServiceBusMapService MapService
+@inject IWebHostEnvironment Env
+
+<PageTitle>Service Bus Map</PageTitle>
+
+<MudPaper Class="pa-3 mb-2" Elevation="1" Style="background: var(--mud-palette-surface)">
+    <MudStack Row="true" AlignItems="AlignItems.Center">
+        <MudText Typo="Typo.h6" Color="Color.Primary">
+            <MudIcon Icon="@Icons.Material.Filled.Hub" Class="mr-1" /> Service Bus Map
+        </MudText>
+        <MudText Typo="Typo.caption" Color="Color.Default" Class="ml-2">
+            MassTransit publishers / consumers entre microservicios
+        </MudText>
+        <MudSpacer />
+        @if (_lastResult is not null)
+        {
+            <MudText Typo="Typo.caption" Color="Color.Default" Class="mr-2">
+                Última actualización: @_lastResult.CompletedAt.ToLocalTime().ToString("HH:mm:ss")
+            </MudText>
+        }
+        <MudButton StartIcon="@Icons.Material.Filled.Refresh"
+                   Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   Disabled="_isRegenerating"
+                   OnClick="RegenerateAsync">
+            @(_isRegenerating ? "Actualizando..." : "Actualizar")
+        </MudButton>
+    </MudStack>
+    @if (_isRegenerating)
+    {
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mt-2" />
+    }
+</MudPaper>
+
+@if (_lastResult is { Success: false })
+{
+    <MudAlert Severity="Severity.Error" Class="mb-2">
+        <MudText Typo="Typo.body2"><b>Falló la regeneración.</b></MudText>
+        <pre style="white-space: pre-wrap; margin: 0; font-size: 0.8em;">@_lastResult.Error</pre>
+    </MudAlert>
+}
+
+@if (_mapExists)
+{
+    <iframe src="@_mapUrl"
+            style="width:100%; height: calc(100vh - 140px); border: 1px solid var(--mud-palette-divider); border-radius: 4px; background: #0f0f14;">
+    </iframe>
+}
+else
+{
+    <MudAlert Severity="Severity.Info">
+        El mapa aún no se ha generado. Pulsa <b>Actualizar</b> para ejecutar el script.
+    </MudAlert>
+}

@@ -1,0 +1,22 @@
+@using BlazorMonaco.Editor
+@inject IJSRuntime JS
+
+<MudDialog>
+    <DialogContent>
+        <div style="height: 70vh; width: 100%; position: relative;">
+            <StandaloneDiffEditor @ref="_editor"
+                                  ConstructionOptions="Options"
+                                  OnDidInit="OnInit"
+                                  CssClass="monaco-fill" />
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Close">Cerrar</MudButton>
+    </DialogActions>
+</MudDialog>
+
+<style>
+    .monaco-fill, .monaco-fill .monaco-diff-editor,
+    .monaco-fill .monaco-editor, .monaco-fill .monaco-editor .overflow-guard
+    { height: 100% !important; width: 100% !important; }
+</style>

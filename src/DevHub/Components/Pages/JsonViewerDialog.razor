@@ -1,0 +1,43 @@
+@using BlazorMonaco.Editor
+@using DevHub.Services.SecretProfiles
+@inject SecretProfileService ProfileService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <div style="height: 70vh; width: 100%; position: relative;">
+            <StandaloneCodeEditor @ref="_editor"
+                                  ConstructionOptions="Options"
+                                  OnDidInit="OnInit"
+                                  CssClass="monaco-fill" />
+        </div>
+    </DialogContent>
+    <DialogActions>
+        @if (CanEdit)
+        {
+            <MudSwitch T="bool" Value="_editMode" ValueChanged="OnEditModeChanged"
+                       Color="Color.Warning" Label="@(_editMode ? "Editable" : "Solo lectura")" />
+            <MudButton StartIcon="@Icons.Material.Filled.AutoFixHigh"
+                       Variant="Variant.Outlined"
+                       Color="Color.Secondary"
+                       Disabled="@(_busy || !_editMode)"
+                       OnClick="FormatAsync">
+                Format
+            </MudButton>
+            <MudButton StartIcon="@Icons.Material.Filled.Save"
+                       Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Disabled="@(_busy || !_editMode)"
+                       OnClick="SaveAsync">
+                @(_busy ? "Guardando…" : "Guardar")
+            </MudButton>
+        }
+        <MudSpacer />
+        <MudButton OnClick="Close">Cerrar</MudButton>
+    </DialogActions>
+</MudDialog>
+
+<style>
+    .monaco-fill, .monaco-fill .monaco-editor,
+    .monaco-fill .monaco-editor .overflow-guard { height: 100% !important; width: 100% !important; }
+</style>
