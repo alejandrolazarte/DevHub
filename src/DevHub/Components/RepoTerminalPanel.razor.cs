@@ -1,35 +1,29 @@
 using DevHub.Models;
 using DevHub.Services;
 using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
 using MudBlazor;
 
 namespace DevHub.Components;
 
-public partial class RepoTerminalPanel : IDisposable
+public partial class RepoTerminalPanel
 {
     [Inject] RepoCommandsService CommandsService { get; set; } = default!;
     [Inject] CustomCommandService CustomCommandService { get; set; } = default!;
     [Inject] HiddenCommandService HiddenCommandService { get; set; } = default!;
-    [Inject] IProcessStreamer Streamer { get; set; } = default!;
     [Inject] IDialogService DialogService { get; set; } = default!;
-    [Inject] IJSRuntime JS { get; set; } = default!;
 
     private bool _open;
     private bool _loading;
-    private bool _running;
     private bool _compact;
     private RepoInfo? _repo;
     private IReadOnlyList<ProjectCommand> _autoCommands = [];
     private List<CustomRepoCommand> _customCommands = [];
-    private List<string> _outputLines = [];
-    private CancellationTokenSource? _cts;
+    private InteractiveConsole? _console;
 
     public async Task OpenForRepoAsync(RepoInfo repo)
     {
         _repo = repo;
         _open = true;
-        _outputLines = [];
         _loading = true;
         await InvokeAsync(StateHasChanged);
 
@@ -48,24 +42,18 @@ public partial class RepoTerminalPanel : IDisposable
         }
     }
 
+    private void InjectCommand(string command) => _console?.InjectCommand(command);
+
     private async Task LoadCommandsAsync()
     {
-        if (_repo is null)
-        {
-            return;
-        }
-
+        if (_repo is null) return;
         _autoCommands = await CommandsService.GetAutoCommandsAsync(_repo.Path);
         _customCommands = [.. await CustomCommandService.GetByRepoAsync(_repo.Path)];
     }
 
     private async Task RescanAsync()
     {
-        if (_repo is null)
-        {
-            return;
-        }
-
+        if (_repo is null) return;
         await HiddenCommandService.RestoreAllAsync(_repo.Path);
         await LoadCommandsAsync();
         await InvokeAsync(StateHasChanged);
@@ -73,11 +61,7 @@ public partial class RepoTerminalPanel : IDisposable
 
     private async Task HideAutoCommandAsync(ProjectCommand cmd)
     {
-        if (_repo is null)
-        {
-            return;
-        }
-
+        if (_repo is null) return;
         await HiddenCommandService.HideAsync(_repo.Path, cmd.Name);
         _autoCommands = _autoCommands.Where(c => c.Name != cmd.Name).ToList();
         await InvokeAsync(StateHasChanged);
@@ -90,67 +74,17 @@ public partial class RepoTerminalPanel : IDisposable
         var result = await dialog.Result;
 
         if (result is { Canceled: false, Data: (string name, string command, string icon) })
-        {
             await SaveCustomCommandAsync(name, command, icon);
-        }
     }
 
     private async Task SaveCustomCommandAsync(string name, string command, string icon)
     {
-        if (_repo is null)
-        {
-            return;
-        }
-
+        if (_repo is null) return;
         await CustomCommandService.AddAsync(_repo.Path, name, command, icon);
         _customCommands = [.. await CustomCommandService.GetByRepoAsync(_repo.Path)];
         Snackbar.Add("Comando guardado.", Severity.Success);
         await InvokeAsync(StateHasChanged);
     }
-
-    private async Task RunCommandAsync(ProjectCommand cmd)
-    {
-        if (_repo is null || _running)
-        {
-            return;
-        }
-
-        _outputLines = [$"> {cmd.Command}", ""];
-        _running = true;
-        _cts = new CancellationTokenSource();
-        await InvokeAsync(StateHasChanged);
-
-        try
-        {
-            await Streamer.StreamAsync(_repo.Path, cmd.Command, async line =>
-            {
-                _outputLines.Add(line);
-                await InvokeAsync(StateHasChanged);
-            }, _cts.Token);
-        }
-        catch (OperationCanceledException)
-        {
-            _outputLines.Add("[detenido]");
-        }
-        catch (Exception ex)
-        {
-            _outputLines.Add($"[error] {ex.Message}");
-        }
-        finally
-        {
-            _running = false;
-            _cts?.Dispose();
-            _cts = null;
-            await InvokeAsync(StateHasChanged);
-        }
-    }
-
-    private Task RunCustomAsync(CustomRepoCommand custom) =>
-        RunCommandAsync(new ProjectCommand(custom.Name, custom.Command, CommandSource.Custom));
-
-    private void StopCommand() => _cts?.Cancel();
-
-    private void ClearOutput() => _outputLines = [];
 
     private async Task DeleteCustomAsync(int id)
     {
@@ -159,11 +93,7 @@ public partial class RepoTerminalPanel : IDisposable
         await InvokeAsync(StateHasChanged);
     }
 
-    private void Close()
-    {
-        _cts?.Cancel();
-        _open = false;
-    }
+    private void Close() => _open = false;
 
     private static readonly Dictionary<string, string> _iconMap = new()
     {
@@ -187,33 +117,11 @@ public partial class RepoTerminalPanel : IDisposable
     private static string GetIcon(ProjectCommand cmd)
     {
         var name = cmd.Name.ToLowerInvariant();
-        if (name.Contains("run"))
-        {
-            return Icons.Material.Filled.PlayArrow;
-        }
-
-        if (name.Contains("build"))
-        {
-            return Icons.Material.Filled.Build;
-        }
-
-        if (name.Contains("test"))
-        {
-            return Icons.Material.Filled.BugReport;
-        }
-
+        if (name.Contains("run"))    return Icons.Material.Filled.PlayArrow;
+        if (name.Contains("build"))  return Icons.Material.Filled.Build;
+        if (name.Contains("test"))   return Icons.Material.Filled.BugReport;
         if (name.Contains("serve") || name.Contains("dev") || name.Contains("start"))
-        {
-            return Icons.Material.Filled.RocketLaunch;
-        }
-
+                                     return Icons.Material.Filled.RocketLaunch;
         return Icons.Material.Filled.ChevronRight;
-    }
-
-    public void Dispose()
-    {
-        _cts?.Cancel();
-        _cts?.Dispose();
-        GC.SuppressFinalize(this);
     }
 }
