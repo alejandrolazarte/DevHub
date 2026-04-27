@@ -46,14 +46,22 @@ public partial class RepoTerminalPanel
 
     private async Task LoadCommandsAsync()
     {
-        if (_repo is null) return;
+        if (_repo is null)
+        {
+            return;
+        }
+
         _autoCommands = await CommandsService.GetAutoCommandsAsync(_repo.Path);
         _customCommands = [.. await CustomCommandService.GetByRepoAsync(_repo.Path)];
     }
 
     private async Task RescanAsync()
     {
-        if (_repo is null) return;
+        if (_repo is null)
+        {
+            return;
+        }
+
         await HiddenCommandService.RestoreAllAsync(_repo.Path);
         await LoadCommandsAsync();
         await InvokeAsync(StateHasChanged);
@@ -61,7 +69,11 @@ public partial class RepoTerminalPanel
 
     private async Task HideAutoCommandAsync(ProjectCommand cmd)
     {
-        if (_repo is null) return;
+        if (_repo is null)
+        {
+            return;
+        }
+
         await HiddenCommandService.HideAsync(_repo.Path, cmd.Name);
         _autoCommands = _autoCommands.Where(c => c.Name != cmd.Name).ToList();
         await InvokeAsync(StateHasChanged);
@@ -74,12 +86,18 @@ public partial class RepoTerminalPanel
         var result = await dialog.Result;
 
         if (result is { Canceled: false, Data: (string name, string command, string icon) })
+        {
             await SaveCustomCommandAsync(name, command, icon);
+        }
     }
 
     private async Task SaveCustomCommandAsync(string name, string command, string icon)
     {
-        if (_repo is null) return;
+        if (_repo is null)
+        {
+            return;
+        }
+
         await CustomCommandService.AddAsync(_repo.Path, name, command, icon);
         _customCommands = [.. await CustomCommandService.GetByRepoAsync(_repo.Path)];
         Snackbar.Add("Comando guardado.", Severity.Success);
@@ -117,11 +135,27 @@ public partial class RepoTerminalPanel
     private static string GetIcon(ProjectCommand cmd)
     {
         var name = cmd.Name.ToLowerInvariant();
-        if (name.Contains("run"))    return Icons.Material.Filled.PlayArrow;
-        if (name.Contains("build"))  return Icons.Material.Filled.Build;
-        if (name.Contains("test"))   return Icons.Material.Filled.BugReport;
+
+        if (name.Contains("run"))
+        {
+            return Icons.Material.Filled.PlayArrow;
+        }
+
+        if (name.Contains("build"))
+        {
+            return Icons.Material.Filled.Build;
+        }
+
+        if (name.Contains("test"))
+        {
+            return Icons.Material.Filled.BugReport;
+        }
+
         if (name.Contains("serve") || name.Contains("dev") || name.Contains("start"))
-                                     return Icons.Material.Filled.RocketLaunch;
+        {
+            return Icons.Material.Filled.RocketLaunch;
+        }
+
         return Icons.Material.Filled.ChevronRight;
     }
 }

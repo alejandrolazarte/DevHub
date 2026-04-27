@@ -10,7 +10,7 @@ public class Then_url_gets_blue_color
     {
         var segments = ConsoleHighlighter.Tokenize("Now listening on https://localhost:5001").ToList();
 
-        var url = segments.FirstOrDefault(s => s.Text.StartsWith("https://"));
+        var url = segments.FirstOrDefault(s => s.Text.StartsWith("https://", StringComparison.Ordinal));
         url.Text.ShouldNotBeNull();
         url.Color.ShouldBe("#60a5fa");
     }

@@ -20,7 +20,14 @@ public sealed class ShellSession
     public event Action? Exited;
 
     public string RepoPath { get; }
-    public bool HasExited { get { try { return _process.HasExited; } catch { return true; } } }
+    public bool HasExited
+    {
+        get
+        {
+            try { return _process.HasExited; }
+            catch { return true; }
+        }
+    }
 
     private ShellSession(string repoPath, Process process)
     {
@@ -50,11 +57,17 @@ public sealed class ShellSession
 
         process.OutputDataReceived += (_, e) =>
         {
-            if (e.Data is not null) session.Add(ConsoleLine.FromOutput(StripAnsi(e.Data)));
+            if (e.Data is not null)
+            {
+                session.Add(ConsoleLine.FromOutput(StripAnsi(e.Data)));
+            }
         };
         process.ErrorDataReceived += (_, e) =>
         {
-            if (e.Data is not null) session.Add(ConsoleLine.FromError(StripAnsi(e.Data)));
+            if (e.Data is not null)
+            {
+                session.Add(ConsoleLine.FromError(StripAnsi(e.Data)));
+            }
         };
         process.Exited += (_, _) =>
         {
@@ -71,7 +84,10 @@ public sealed class ShellSession
 
     public IReadOnlyList<ConsoleLine> GetLines()
     {
-        lock (_linesLock) return [.. _lines];
+        lock (_linesLock)
+        {
+            return [.. _lines];
+        }
     }
 
     public async Task SendAsync(string command)
@@ -82,7 +98,10 @@ public sealed class ShellSession
 
     public void ClearLines()
     {
-        lock (_linesLock) _lines.Clear();
+        lock (_linesLock)
+        {
+            _lines.Clear();
+        }
     }
 
     public void Kill()
@@ -93,7 +112,11 @@ public sealed class ShellSession
 
     private void Add(ConsoleLine line)
     {
-        lock (_linesLock) _lines.Add(line);
+        lock (_linesLock)
+        {
+            _lines.Add(line);
+        }
+
         LineAdded?.Invoke(line);
     }
 
@@ -108,6 +131,7 @@ public sealed class ShellSession
                 ? (pwsh, "-NoLogo -NoExit")
                 : ("powershell.exe", "-NoLogo -NoExit");
         }
+
         var bash = FindInPath("bash") ?? "/bin/bash";
         return (bash, string.Empty);
     }
@@ -131,7 +155,9 @@ public sealed class ShellSessionService : IDisposable
         lock (_lock)
         {
             if (_sessions.TryGetValue(repoPath, out var existing) && !existing.HasExited)
+            {
                 return existing;
+            }
 
             var session = ShellSession.Create(repoPath);
             _sessions[repoPath] = session;
@@ -143,7 +169,11 @@ public sealed class ShellSessionService : IDisposable
     {
         lock (_lock)
         {
-            if (!_sessions.TryGetValue(repoPath, out var s)) return;
+            if (!_sessions.TryGetValue(repoPath, out var s))
+            {
+                return;
+            }
+
             s.Kill();
             _sessions.Remove(repoPath);
         }
@@ -153,7 +183,11 @@ public sealed class ShellSessionService : IDisposable
     {
         lock (_lock)
         {
-            foreach (var s in _sessions.Values) s.Kill();
+            foreach (var s in _sessions.Values)
+            {
+                s.Kill();
+            }
+
             _sessions.Clear();
         }
     }

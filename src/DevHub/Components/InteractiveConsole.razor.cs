@@ -31,14 +31,22 @@ public partial class InteractiveConsole : IDisposable
         get
         {
             var lines = _session?.GetLines() ?? [];
-            if (string.IsNullOrWhiteSpace(_filter)) return lines;
+            if (string.IsNullOrWhiteSpace(_filter))
+            {
+                return lines;
+            }
+
             return lines.Where(l => l.Text.Contains(_filter, StringComparison.OrdinalIgnoreCase)).ToList();
         }
     }
 
     protected override async Task OnParametersSetAsync()
     {
-        if (string.IsNullOrEmpty(RepoPath) || RepoPath == _currentPath) return;
+        if (string.IsNullOrEmpty(RepoPath) || RepoPath == _currentPath)
+        {
+            return;
+        }
+
         await AttachSessionAsync(RepoPath);
     }
 
@@ -72,13 +80,18 @@ public partial class InteractiveConsole : IDisposable
     private async Task ExecuteCommandAsync()
     {
         if (_session is null || string.IsNullOrWhiteSpace(_inputText) || _session.HasExited)
+        {
             return;
+        }
 
         var cmd = _inputText.Trim();
         _inputText = string.Empty;
 
         if (_history.Count == 0 || _history[^1] != cmd)
+        {
             _history.Add(cmd);
+        }
+
         _historyIndex = _history.Count;
 
         TrackCdLocally(cmd);
@@ -121,7 +134,9 @@ public partial class InteractiveConsole : IDisposable
         var result = await dialog.Result;
 
         if (result is { Canceled: false, Data: string path })
+        {
             InjectCommand(OperatingSystem.IsWindows() ? $"cd \"{path}\"" : $"cd '{path}'");
+        }
     }
 
     // ── Shell lifecycle ───────────────────────────────────────────────────────
@@ -156,7 +171,9 @@ public partial class InteractiveConsole : IDisposable
         {
             var atBottom = await JS.InvokeAsync<bool>("devhubConsole.isScrolledToBottom", _outputDiv);
             if (_autoScroll && !atBottom)
+            {
                 _autoScroll = false;
+            }
         }
         catch { }
     }
@@ -169,13 +186,19 @@ public partial class InteractiveConsole : IDisposable
 
     private async Task ScrollToBottomAsync()
     {
-        try { await JS.InvokeVoidAsync("devhubConsole.scrollToBottom", _outputDiv); }
+        try
+        {
+            await JS.InvokeVoidAsync("devhubConsole.scrollToBottom", _outputDiv);
+        }
         catch { }
     }
 
     private async Task FocusInputAsync()
     {
-        try { await JS.InvokeVoidAsync("devhubConsole.focusElement", _inputEl); }
+        try
+        {
+            await JS.InvokeVoidAsync("devhubConsole.focusElement", _inputEl);
+        }
         catch { }
     }
 
@@ -186,7 +209,10 @@ public partial class InteractiveConsole : IDisposable
         try
         {
             await InvokeAsync(StateHasChanged);
-            if (_autoScroll) await ScrollToBottomAsync();
+            if (_autoScroll)
+            {
+                await ScrollToBottomAsync();
+            }
         }
         catch (ObjectDisposedException) { }
         catch (InvalidOperationException) { }
@@ -194,7 +220,10 @@ public partial class InteractiveConsole : IDisposable
 
     private async void OnShellExited()
     {
-        try { await InvokeAsync(StateHasChanged); }
+        try
+        {
+            await InvokeAsync(StateHasChanged);
+        }
         catch (ObjectDisposedException) { }
         catch (InvalidOperationException) { }
     }
@@ -203,13 +232,17 @@ public partial class InteractiveConsole : IDisposable
 
     private void TrackCdLocally(string cmd)
     {
-        // Keep _currentPath in sync for the folder button display
         if (!cmd.StartsWith("cd ", StringComparison.OrdinalIgnoreCase) &&
             !cmd.Equals("cd", StringComparison.OrdinalIgnoreCase))
+        {
             return;
+        }
 
         var parts = cmd.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
-        if (parts.Length < 2) return;
+        if (parts.Length < 2)
+        {
+            return;
+        }
 
         var target = parts[1].Trim('"', '\'');
         try
@@ -219,14 +252,20 @@ public partial class InteractiveConsole : IDisposable
                 : Path.GetFullPath(Path.Combine(_currentPath, target));
 
             if (Directory.Exists(resolved))
+            {
                 _currentPath = resolved;
+            }
         }
         catch { }
     }
 
     private void DetachSession()
     {
-        if (_session is null) return;
+        if (_session is null)
+        {
+            return;
+        }
+
         _session.LineAdded -= OnLineAdded;
         _session.Exited -= OnShellExited;
         _session = null;
@@ -241,5 +280,9 @@ public partial class InteractiveConsole : IDisposable
             _                      => "padding:1px 0",
         };
 
-    public void Dispose() => DetachSession();
+    public void Dispose()
+    {
+        DetachSession();
+        GC.SuppressFinalize(this);
+    }
 }
