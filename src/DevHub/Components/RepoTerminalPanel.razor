@@ -5,11 +5,12 @@
 <MudDrawer @bind-Open="_open"
            Anchor="Anchor.Right"
            Variant="DrawerVariant.Temporary"
-           Width="520px"
-           Elevation="4">
+           Width="600px"
+           Elevation="4"
+           Style="display:flex; flex-direction:column">
 
     @* ── Header ── *@
-    <MudDrawerHeader Style="padding: 8px 12px;">
+    <MudDrawerHeader Style="padding:6px 12px; flex-shrink:0">
         <MudStack Row="true" AlignItems="AlignItems.Center" Style="width:100%">
             <MudIcon Icon="@Icons.Material.Filled.Terminal" Color="Color.Primary" Size="Size.Small" />
             <MudText Typo="Typo.subtitle1" Class="ml-1"
@@ -29,147 +30,119 @@
         </MudStack>
     </MudDrawerHeader>
 
-    <MudStack Spacing="0" Style="padding: 8px 12px;">
+    @* ── Body: commands + interactive console ── *@
+    <div style="display:flex; flex-direction:column; flex:1; min-height:0; overflow:hidden">
 
-        @* ── Detectados ── *@
-        @if (_loading)
-        {
-            <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mb-2" />
-        }
-        else
-        {
-            <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-1">
-                <MudText Typo="Typo.caption" Color="Color.Secondary">Detectados</MudText>
-                <MudSpacer />
-                <MudTooltip Text="Volver a escanear y restaurar todos">
-                    <MudIconButton Icon="@Icons.Material.Filled.Refresh"
-                                   Size="Size.Small"
-                                   Color="Color.Default"
-                                   OnClick="RescanAsync"
-                                   aria-label="Rescanear" />
-                </MudTooltip>
-            </MudStack>
+        @* Commands section (max 260px, scrolls internally) *@
+        <div style="flex-shrink:0; max-height:260px; overflow-y:auto; padding:6px 12px">
 
-            @if (_autoCommands.Count == 0)
+            @if (_loading)
             {
-                <MudText Typo="Typo.caption" Color="Color.Default" Class="mb-2">
-                    No se detectaron comandos.
-                </MudText>
+                <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mb-2" />
             }
             else
             {
-                <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="1" Class="mb-2">
-                    @foreach (var cmd in _autoCommands)
-                    {
-                        <MudTooltip Text="@cmd.Command" Placement="Placement.Bottom">
-                            <MudButtonGroup Variant="Variant.Outlined" Size="Size.Small" Style="margin-bottom:4px">
-                                <MudButton Color="Color.Primary"
-                                           StartIcon="@GetIcon(cmd)"
-                                           Disabled="@_running"
-                                           OnClick="() => RunCommandAsync(cmd)">
-                                    @if (!_compact)
-                                    {
-                                        @cmd.Name
-                                    }
-                                </MudButton>
-                                <MudIconButton Icon="@Icons.Material.Filled.Close"
-                                               Size="Size.Small"
-                                               Color="Color.Default"
-                                               OnClick="() => HideAutoCommandAsync(cmd)"
-                                               aria-label="Ocultar" />
-                            </MudButtonGroup>
-                        </MudTooltip>
-                    }
-                </MudStack>
-            }
-        }
-
-        <MudDivider Class="my-2" />
-
-        @* ── Personalizados ── *@
-        <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-1">
-            <MudText Typo="Typo.caption" Color="Color.Secondary">Personalizados</MudText>
-            <MudSpacer />
-            <MudTooltip Text="Añadir comando" Placement="Placement.Left">
-                <MudIconButton Icon="@Icons.Material.Filled.AddCircleOutline"
-                               Size="Size.Small"
-                               Color="Color.Primary"
-                               OnClick="OpenAddCommandDialogAsync"
-                               aria-label="Añadir comando" />
-            </MudTooltip>
-        </MudStack>
-
-        @if (_customCommands.Count == 0)
-        {
-            <MudText Typo="Typo.caption" Color="Color.Default" Class="mb-2">
-                Sin comandos personalizados.
-            </MudText>
-        }
-        else
-        {
-            <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="1" Class="mb-2">
-                @foreach (var custom in _customCommands)
-                {
-                    <MudTooltip Text="@custom.Command" Placement="Placement.Bottom">
-                        <MudButtonGroup Variant="Variant.Outlined" Size="Size.Small" Style="margin-bottom:4px">
-                            <MudButton Color="Color.Secondary"
-                                       StartIcon="@GetCustomIcon(custom)"
-                                       Disabled="@_running"
-                                       OnClick="() => RunCustomAsync(custom)">
-                                @if (!_compact)
-                                {
-                                    @custom.Name
-                                }
-                            </MudButton>
-                            <MudIconButton Icon="@Icons.Material.Filled.DeleteOutline"
-                                           Size="Size.Small"
-                                           Color="Color.Default"
-                                           OnClick="() => DeleteCustomAsync(custom.Id)"
-                                           aria-label="Eliminar" />
-                        </MudButtonGroup>
+                @* Detectados *@
+                <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-1">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Detectados</MudText>
+                    <MudSpacer />
+                    <MudTooltip Text="Volver a escanear y restaurar todos">
+                        <MudIconButton Icon="@Icons.Material.Filled.Refresh"
+                                       Size="Size.Small"
+                                       Color="Color.Default"
+                                       OnClick="RescanAsync"
+                                       aria-label="Rescanear" />
                     </MudTooltip>
-                }
-            </MudStack>
-        }
+                </MudStack>
 
-        @* ── Output ── *@
-        @if (_outputLines.Count > 0 || _running)
-        {
-            <MudDivider Class="my-2" />
-            <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-1">
-                <MudText Typo="Typo.caption" Color="Color.Secondary">Output</MudText>
-                <MudSpacer />
-                @if (_running)
+                @if (_autoCommands.Count == 0)
                 {
-                    <MudButton Size="Size.Small"
-                               Color="Color.Error"
-                               Variant="Variant.Outlined"
-                               StartIcon="@Icons.Material.Filled.Stop"
-                               OnClick="StopCommand">
-                        Stop
-                    </MudButton>
+                    <MudText Typo="Typo.caption" Color="Color.Default" Class="mb-2">
+                        No se detectaron comandos.
+                    </MudText>
                 }
                 else
                 {
-                    <MudIconButton Icon="@Icons.Material.Filled.DeleteSweep"
-                                   Size="Size.Small"
-                                   Color="Color.Default"
-                                   OnClick="ClearOutput"
-                                   aria-label="Limpiar output" />
+                    <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="1" Class="mb-2">
+                        @foreach (var cmd in _autoCommands)
+                        {
+                            <MudTooltip Text="@cmd.Command" Placement="Placement.Bottom">
+                                <MudButtonGroup Variant="Variant.Outlined" Size="Size.Small" Style="margin-bottom:4px">
+                                    <MudButton Color="Color.Primary"
+                                               StartIcon="@GetIcon(cmd)"
+                                               OnClick="() => InjectCommand(cmd.Command)">
+                                        @if (!_compact)
+                                        {
+                                            @cmd.Name
+                                        }
+                                    </MudButton>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Close"
+                                                   Size="Size.Small"
+                                                   Color="Color.Default"
+                                                   OnClick="() => HideAutoCommandAsync(cmd)"
+                                                   aria-label="Ocultar" />
+                                </MudButtonGroup>
+                            </MudTooltip>
+                        }
+                    </MudStack>
                 }
-            </MudStack>
 
-            <div style="background:#0a0a0f; border-radius:4px; padding:8px; max-height:400px; overflow-y:auto; font-family:monospace; font-size:0.75rem; color:#e0e0e0;">
-                @foreach (var line in _outputLines)
-                {
-                    <div>@line</div>
-                }
-                @if (_running)
-                {
-                    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mt-1" />
-                }
-            </div>
-        }
+                <MudDivider Class="my-1" />
 
-    </MudStack>
+                @* Personalizados *@
+                <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-1 mt-1">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Personalizados</MudText>
+                    <MudSpacer />
+                    <MudTooltip Text="Añadir comando" Placement="Placement.Left">
+                        <MudIconButton Icon="@Icons.Material.Filled.AddCircleOutline"
+                                       Size="Size.Small"
+                                       Color="Color.Primary"
+                                       OnClick="OpenAddCommandDialogAsync"
+                                       aria-label="Añadir comando" />
+                    </MudTooltip>
+                </MudStack>
+
+                @if (_customCommands.Count == 0)
+                {
+                    <MudText Typo="Typo.caption" Color="Color.Default" Class="mb-1">
+                        Sin comandos personalizados.
+                    </MudText>
+                }
+                else
+                {
+                    <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="1" Class="mb-1">
+                        @foreach (var custom in _customCommands)
+                        {
+                            <MudTooltip Text="@custom.Command" Placement="Placement.Bottom">
+                                <MudButtonGroup Variant="Variant.Outlined" Size="Size.Small" Style="margin-bottom:4px">
+                                    <MudButton Color="Color.Secondary"
+                                               StartIcon="@GetCustomIcon(custom)"
+                                               OnClick="() => InjectCommand(custom.Command)">
+                                        @if (!_compact)
+                                        {
+                                            @custom.Name
+                                        }
+                                    </MudButton>
+                                    <MudIconButton Icon="@Icons.Material.Filled.DeleteOutline"
+                                                   Size="Size.Small"
+                                                   Color="Color.Default"
+                                                   OnClick="() => DeleteCustomAsync(custom.Id)"
+                                                   aria-label="Eliminar" />
+                                </MudButtonGroup>
+                            </MudTooltip>
+                        }
+                    </MudStack>
+                }
+            }
+        </div>
+
+        <MudDivider />
+
+        @* Interactive console — fills remaining height *@
+        <div style="flex:1; min-height:0">
+            <InteractiveConsole @ref="_console" RepoPath="@_repo?.Path" />
+        </div>
+
+    </div>
+
 </MudDrawer>

@@ -1,0 +1,127 @@
+@using DevHub.Models
+@using DevHub.Services
+@using DevHub.Helpers
+
+@* Output area *@
+<div style="display:flex; flex-direction:column; height:100%; background:#08080f; overflow:hidden">
+
+    @* ── Toolbar ── *@
+    <div style="display:flex; align-items:center; gap:4px; padding:4px 8px; background:#0d0d18; border-bottom:1px solid #1a1a2e; flex-shrink:0; min-height:36px">
+
+        @if (_session is not null)
+        {
+            <MudTooltip Text="@(_session.HasExited ? "Reiniciar shell" : "Matar shell")">
+                <MudIconButton Icon="@(_session.HasExited ? Icons.Material.Filled.RestartAlt : Icons.Material.Filled.Stop)"
+                               Color="@(_session.HasExited ? Color.Warning : Color.Error)"
+                               Size="Size.Small"
+                               OnClick="ToggleShellAsync" />
+            </MudTooltip>
+        }
+
+        <MudTooltip Text="@_currentPath" Placement="Placement.Bottom">
+            <MudButton Size="Size.Small"
+                       StartIcon="@Icons.Material.Filled.FolderOpen"
+                       Color="Color.Default"
+                       Variant="Variant.Text"
+                       Style="font-family:monospace; font-size:0.68rem; text-transform:none; min-width:0; padding:2px 6px; max-width:160px; overflow:hidden"
+                       OnClick="OpenFolderPickerAsync">
+                <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:block; max-width:140px">
+                    @System.IO.Path.GetFileName(_currentPath.TrimEnd('/', '\\'))
+                </span>
+            </MudButton>
+        </MudTooltip>
+
+        <div style="flex:1; min-width:0" />
+
+        <MudTextField @bind-Value="_filter"
+                      Placeholder="filtrar..."
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      Clearable="true"
+                      Immediate="true"
+                      Style="font-size:0.72rem; max-width:140px"
+                      Margin="Margin.Dense"
+                      Variant="Variant.Outlined" />
+
+        @if (!_autoScroll)
+        {
+            <MudTooltip Text="Ir al final">
+                <MudIconButton Icon="@Icons.Material.Filled.KeyboardDoubleArrowDown"
+                               Size="Size.Small"
+                               Color="Color.Primary"
+                               OnClick="ResumeAutoScrollAsync" />
+            </MudTooltip>
+        }
+
+        <MudTooltip Text="Limpiar">
+            <MudIconButton Icon="@Icons.Material.Filled.DeleteSweep"
+                           Size="Size.Small"
+                           Color="Color.Default"
+                           OnClick="ClearConsole" />
+        </MudTooltip>
+    </div>
+
+    @* ── Lines ── *@
+    <div @ref="_outputDiv"
+         @onscroll="OnOutputScrolled"
+         style="flex:1; min-height:0; overflow-y:auto; padding:6px 10px; font-family:'Cascadia Code','Consolas',monospace; font-size:0.72rem; color:#d4d4d8; line-height:1.45; word-break:break-all; white-space:pre-wrap">
+
+        @{
+            var visibleLines = FilteredLines;
+        }
+        @foreach (var line in visibleLines)
+        {
+            <div style="@LineStyle(line)">
+                @if (line.Kind == ConsoleLineKind.Input)
+                {
+                    <span style="color:#c084fc; user-select:none; margin-right:5px">❯</span>
+                }
+                @foreach (var (text, color) in ConsoleHighlighter.Tokenize(line.Text))
+                {
+                    @if (color is not null)
+                    {
+                        <span style="color:@color">@text</span>
+                    }
+                    else
+                    {
+                        @text
+                    }
+                }
+            </div>
+        }
+
+        @if (visibleLines.Count == 0)
+        {
+            @if (string.IsNullOrEmpty(_filter))
+            {
+                <div style="color:#3f3f5a; font-style:italic; user-select:none">
+                    Shell listo. Escribí un comando o hacé clic en un botón de arriba para inyectarlo.
+                </div>
+            }
+            else
+            {
+                <div style="color:#3f3f5a; font-style:italic">Sin resultados para "<span style="color:#a0a0c0">@_filter</span>"</div>
+            }
+        }
+    </div>
+
+    @* ── Input ── *@
+    <div style="display:flex; align-items:center; padding:5px 8px; background:#0d0d18; border-top:1px solid #1a1a2e; flex-shrink:0; gap:6px">
+        <span style="color:#c084fc; font-family:monospace; font-size:0.85rem; user-select:none; flex-shrink:0">$</span>
+        <input @ref="_inputEl"
+               @bind="_inputText"
+               @bind:event="oninput"
+               @onkeydown="HandleKeyDownAsync"
+               placeholder="comando..."
+               style="flex:1; background:transparent; border:none; outline:none; color:#e4e4e7; font-family:'Cascadia Code','Consolas',monospace; font-size:0.72rem; padding:2px 0; caret-color:#c084fc"
+               autocomplete="off"
+               spellcheck="false"
+               disabled="@(_session?.HasExited ?? true)" />
+        <MudIconButton Icon="@Icons.Material.Filled.SubdirectoryArrowLeft"
+                       Size="Size.Small"
+                       Color="Color.Primary"
+                       OnClick="ExecuteCommandAsync"
+                       Disabled="@(string.IsNullOrWhiteSpace(_inputText) || (_session?.HasExited ?? true))"
+                       aria-label="Ejecutar" />
+    </div>
+</div>

@@ -54,6 +54,7 @@ builder.Services.AddSingleton<CustomCommandService>();
 builder.Services.AddSingleton<HiddenCommandService>();
 builder.Services.AddSingleton<RepoCommandsService>();
 builder.Services.AddSingleton<IProcessStreamer, ProcessStreamer>();
+builder.Services.AddSingleton<ShellSessionService>();
 
 builder.Services.Configure<SecretProfileOptions>(
     builder.Configuration.GetSection("SecretProfiles"));
