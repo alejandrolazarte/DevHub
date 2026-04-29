@@ -1,4 +1,5 @@
 using DevHub.Components;
+using DevHub.Helpers;
 using DevHub.Models;
 using DevHub.Services;
 using Microsoft.AspNetCore.Components;
@@ -82,20 +83,17 @@ public partial class Home : IDisposable
     {
         var path = await OpenFolderPickerAsync();
         if (path is null)
-        {
             return;
-        }
 
         _catalogBusy = true;
         try
         {
-            await RepoCatalog.AddAsync(path, CancellationToken.None);
-            Snackbar.Add($"Repo agregado al catálogo: {path}", Severity.Success);
-            await ManualRefresh();
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
+            if (await Snackbar.TryAsync(
+                () => RepoCatalog.AddAsync(path, CancellationToken.None),
+                $"Repo agregado al catálogo: {path}"))
+            {
+                await ManualRefresh();
+            }
         }
         finally
         {
@@ -107,9 +105,7 @@ public partial class Home : IDisposable
     {
         var path = await OpenFolderPickerAsync();
         if (path is null)
-        {
             return;
-        }
 
         _catalogBusy = true;
         try
@@ -129,16 +125,14 @@ public partial class Home : IDisposable
         }
     }
 
-    private async Task<string?> OpenFolderPickerAsync(string? initialPath = null)
+    private Task<string?> OpenFolderPickerAsync(string? initialPath = null)
     {
         var parameters = new DialogParameters<FolderPickerDialog>
         {
             { x => x.InitialPath, initialPath ?? string.Empty }
         };
         var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseOnEscapeKey = true };
-        var dialog = await DialogService.ShowAsync<FolderPickerDialog>("Seleccionar carpeta", parameters, options);
-        var result = await dialog.Result;
-        return result is { Canceled: false, Data: string path } ? path : null;
+        return DialogService.ShowAndGetAsync<FolderPickerDialog, string>("Seleccionar carpeta", parameters, options);
     }
 
     private async Task RemoveRepoAsync(RepoInfo repo)

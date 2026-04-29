@@ -1,3 +1,4 @@
+using DevHub.Helpers;
 using DevHub.Services.SecretProfiles;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
@@ -42,27 +43,15 @@ public partial class SecretProfiles
             { x => x.Label, "Nombre del perfil" },
             { x => x.HelperText, "Solo A-Z a-z 0-9 . _ -" },
         };
-        var dlg = await DialogService.ShowAsync<PromptDialog>("Capturar", parameters);
-        var result = await dlg.Result;
-        if (result is null || result.Canceled)
-        {
-            return;
-        }
-        var name = (string?)result.Data;
+        var name = await DialogService.ShowAndGetAsync<PromptDialog, string>("Capturar", parameters);
         if (string.IsNullOrWhiteSpace(name))
-        {
             return;
-        }
 
-        try
+        if (await Snackbar.TryAsync(
+            () => ProfileService.CaptureAsync(serviceName, name, CancellationToken.None),
+            $"Perfil '{name}' capturado."))
         {
-            await ProfileService.CaptureAsync(serviceName, name, CancellationToken.None);
-            Snackbar.Add($"Perfil '{name}' capturado.", Severity.Success);
             await ReloadServiceAsync(serviceName);
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
         }
     }
 
@@ -76,25 +65,21 @@ public partial class SecretProfiles
                 { x => x.ServiceName, serviceName },
                 { x => x.ProfileName, profile.Name },
             };
-            var dlg = await DialogService.ShowAsync<ProdConfirmDialog>("Confirmar aplicar PROD", parameters,
-                new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseButton = false });
-            var result = await dlg.Result;
-            if (result is null || result.Canceled)
+            if (!await DialogService.ShowAndWaitAsync<ProdConfirmDialog>(
+                "Confirmar aplicar PROD", parameters,
+                new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseButton = false }))
             {
                 return;
             }
             prodConfirmed = true;
         }
 
-        try
+        if (await Snackbar.TryAsync(
+            () => ProfileService.ApplyAsync(serviceName, profile.Name, prodConfirmed, CancellationToken.None),
+            $"Aplicado '{profile.Name}' a {serviceName}.",
+            profile.IsProd ? Severity.Warning : Severity.Success))
         {
-            await ProfileService.ApplyAsync(serviceName, profile.Name, prodConfirmed, CancellationToken.None);
-            Snackbar.Add($"Aplicado '{profile.Name}' a {serviceName}.", profile.IsProd ? Severity.Warning : Severity.Success);
             await ReloadServiceAsync(serviceName);
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
         }
     }
 
@@ -108,25 +93,20 @@ public partial class SecretProfiles
             CancelText = "Cancelar",
         });
         if (ok != true)
-        {
             return;
-        }
 
-        try
+        if (await Snackbar.TryAsync(
+            () => ProfileService.DeleteAsync(serviceName, profileName, CancellationToken.None),
+            $"Perfil '{profileName}' borrado.",
+            Severity.Info))
         {
-            await ProfileService.DeleteAsync(serviceName, profileName, CancellationToken.None);
-            Snackbar.Add($"Perfil '{profileName}' borrado.", Severity.Info);
             await ReloadServiceAsync(serviceName);
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
         }
     }
 
     private async Task ViewProfileAsync(string serviceName, string profileName)
     {
-        try
+        await Snackbar.TryAsync(async () =>
         {
             var content = await ProfileService.ReadProfileContentAsync(serviceName, profileName, CancellationToken.None);
             var dlg = await DialogService.ShowAsync<JsonViewerDialog>(
@@ -140,32 +120,24 @@ public partial class SecretProfiles
                 new DialogOptions { MaxWidth = MaxWidth.ExtraLarge, FullWidth = true });
             await dlg.Result;
             await ReloadServiceAsync(serviceName);
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
-        }
+        });
     }
 
     private async Task ViewLiveAsync(string serviceName)
     {
-        try
+        await Snackbar.TryAsync(async () =>
         {
             var content = await ProfileService.ReadActiveContentAsync(serviceName, CancellationToken.None);
             await DialogService.ShowAsync<JsonViewerDialog>(
                 $"{serviceName} · secrets.json (live)",
                 new DialogParameters<JsonViewerDialog> { { x => x.Content, content } },
                 new DialogOptions { MaxWidth = MaxWidth.ExtraLarge, FullWidth = true });
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
-        }
+        });
     }
 
     private async Task DiffProfileAsync(string serviceName, string profileName)
     {
-        try
+        await Snackbar.TryAsync(async () =>
         {
             var original = await ProfileService.ReadActiveContentAsync(serviceName, CancellationToken.None);
             var modified = await ProfileService.ReadProfileContentAsync(serviceName, profileName, CancellationToken.None);
@@ -177,11 +149,7 @@ public partial class SecretProfiles
                     { x => x.Modified, modified },
                 },
                 new DialogOptions { MaxWidth = MaxWidth.ExtraLarge, FullWidth = true });
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
-        }
+        });
     }
 
     private static string FormatSize(long bytes) => bytes < 1024 ? $"{bytes} B" : $"{bytes / 1024.0:F1} KB";
