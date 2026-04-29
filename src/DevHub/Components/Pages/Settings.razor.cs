@@ -1,3 +1,4 @@
+using DevHub.Helpers;
 using DevHub.Models;
 using DevHub.Services;
 using Microsoft.AspNetCore.Components;
@@ -30,15 +31,12 @@ public partial class Settings
 
     private async Task RemoveRepoAsync(string repoPath)
     {
-        try
+        if (await Snackbar.TryAsync(
+            () => RepoCatalog.RemoveAsync(repoPath, CancellationToken.None),
+            "Repo removed from catalog.",
+            Severity.Info))
         {
-            await RepoCatalog.RemoveAsync(repoPath, CancellationToken.None);
             await LoadCatalogAsync();
-            Snackbar.Add("Repo removed from catalog.", Severity.Info);
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
         }
     }
 
@@ -48,9 +46,7 @@ public partial class Settings
         {
             { x => x.Rule, new GroupRule() }
         };
-        var dlg = await DialogService.ShowAsync<GroupRuleDialog>("Add Rule", parameters);
-        var result = await dlg.Result;
-        if (result is { Canceled: false })
+        if (await DialogService.ShowAndWaitAsync<GroupRuleDialog>("Add Rule", parameters))
         {
             await LoadGroupRulesAsync();
         }
@@ -62,9 +58,7 @@ public partial class Settings
         {
             { x => x.Rule, rule }
         };
-        var dlg = await DialogService.ShowAsync<GroupRuleDialog>("Edit Rule", parameters);
-        var result = await dlg.Result;
-        if (result is { Canceled: false })
+        if (await DialogService.ShowAndWaitAsync<GroupRuleDialog>("Edit Rule", parameters))
         {
             await LoadGroupRulesAsync();
         }
@@ -72,15 +66,11 @@ public partial class Settings
 
     private async Task DeleteRuleAsync(int id)
     {
-        try
+        if (await Snackbar.TryAsync(
+            () => GroupRuleService.DeleteAsync(id),
+            "Rule deleted."))
         {
-            await GroupRuleService.DeleteAsync(id);
             await LoadGroupRulesAsync();
-            Snackbar.Add("Rule deleted.", Severity.Success);
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
         }
     }
 
@@ -90,6 +80,7 @@ public partial class Settings
         {
             return;
         }
+
         var orderedIds = _groupRules
             .OrderBy(r => r.Order)
             .Select(r => r.Id)
@@ -99,6 +90,7 @@ public partial class Settings
         {
             return;
         }
+
         (orderedIds[firstSelected - 1], orderedIds[firstSelected]) = (orderedIds[firstSelected], orderedIds[firstSelected - 1]);
         await GroupRuleService.ReorderAsync([.. orderedIds]);
         await LoadGroupRulesAsync();
@@ -110,6 +102,7 @@ public partial class Settings
         {
             return;
         }
+
         var orderedIds = _groupRules
             .OrderBy(r => r.Order)
             .Select(r => r.Id)
@@ -119,6 +112,7 @@ public partial class Settings
         {
             return;
         }
+
         (orderedIds[lastSelected], orderedIds[lastSelected + 1]) = (orderedIds[lastSelected + 1], orderedIds[lastSelected]);
         await GroupRuleService.ReorderAsync([.. orderedIds]);
         await LoadGroupRulesAsync();

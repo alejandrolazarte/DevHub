@@ -1,32 +1,16 @@
-using DevHub.Data;
 using DevHub.Models;
 using DevHub.Services;
 using DevHub.U.Tests.Helpers;
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
 using Shouldly;
 
 namespace DevHub.U.Tests.Services.When_GroupRuleService_is_used;
 
-public class Then_create_adds_rule_with_order
+public class Then_create_adds_rule_with_order(DbFixture db) : IClassFixture<DbFixture>
 {
     [Fact]
-    public async Task Then_create_adds_rule_with_order_Run()
+    public async Task Execute()
     {
-        using var connection = new SqliteConnection("Data Source=:memory:");
-        await connection.OpenAsync();
-
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseSqlite(connection)
-            .Options;
-
-        await using (var db = new ApplicationDbContext(options))
-        {
-            await db.Database.EnsureCreatedAsync();
-        }
-
-        var factory = new TestDbContextFactory(options);
-        var sut = new GroupRuleService(factory);
+        var sut = new GroupRuleService(db.Factory);
 
         var result = await sut.CreateAsync(new GroupRule { Name = "Test", Color = "primary", Prefixes = ["fw_"] });
 
@@ -35,25 +19,12 @@ public class Then_create_adds_rule_with_order
     }
 }
 
-public class Then_getAll_returns_rules_in_order
+public class Then_getAll_returns_rules_in_order(DbFixture db) : IClassFixture<DbFixture>
 {
     [Fact]
-    public async Task Then_getAll_returns_rules_in_order_Run()
+    public async Task Execute()
     {
-        using var connection = new SqliteConnection("Data Source=:memory:");
-        await connection.OpenAsync();
-
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseSqlite(connection)
-            .Options;
-
-        await using (var db = new ApplicationDbContext(options))
-        {
-            await db.Database.EnsureCreatedAsync();
-        }
-
-        var factory = new TestDbContextFactory(options);
-        var sut = new GroupRuleService(factory);
+        var sut = new GroupRuleService(db.Factory);
 
         await sut.CreateAsync(new GroupRule { Name = "First", Color = "red", Prefixes = ["a_"] });
         await sut.CreateAsync(new GroupRule { Name = "Second", Color = "blue", Prefixes = ["b_"] });
@@ -66,25 +37,12 @@ public class Then_getAll_returns_rules_in_order
     }
 }
 
-public class Then_update_modifies_rule
+public class Then_update_modifies_rule(DbFixture db) : IClassFixture<DbFixture>
 {
     [Fact]
-    public async Task Then_update_modifies_rule_Run()
+    public async Task Execute()
     {
-        using var connection = new SqliteConnection("Data Source=:memory:");
-        await connection.OpenAsync();
-
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseSqlite(connection)
-            .Options;
-
-        await using (var db = new ApplicationDbContext(options))
-        {
-            await db.Database.EnsureCreatedAsync();
-        }
-
-        var factory = new TestDbContextFactory(options);
-        var sut = new GroupRuleService(factory);
+        var sut = new GroupRuleService(db.Factory);
 
         var created = await sut.CreateAsync(new GroupRule { Name = "Original", Color = "red", Prefixes = ["a_"] });
         created.Name = "Updated";
@@ -97,25 +55,12 @@ public class Then_update_modifies_rule
     }
 }
 
-public class Then_delete_removes_rule
+public class Then_delete_removes_rule(DbFixture db) : IClassFixture<DbFixture>
 {
     [Fact]
-    public async Task Then_delete_removes_rule_Run()
+    public async Task Execute()
     {
-        using var connection = new SqliteConnection("Data Source=:memory:");
-        await connection.OpenAsync();
-
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseSqlite(connection)
-            .Options;
-
-        await using (var db = new ApplicationDbContext(options))
-        {
-            await db.Database.EnsureCreatedAsync();
-        }
-
-        var factory = new TestDbContextFactory(options);
-        var sut = new GroupRuleService(factory);
+        var sut = new GroupRuleService(db.Factory);
 
         var created = await sut.CreateAsync(new GroupRule { Name = "ToDelete", Color = "red", Prefixes = ["a_"] });
 
@@ -126,25 +71,12 @@ public class Then_delete_removes_rule
     }
 }
 
-public class Then_reorder_changes_order
+public class Then_reorder_changes_order(DbFixture db) : IClassFixture<DbFixture>
 {
     [Fact]
-    public async Task Then_reorder_changes_order_Run()
+    public async Task Execute()
     {
-        using var connection = new SqliteConnection("Data Source=:memory:");
-        await connection.OpenAsync();
-
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseSqlite(connection)
-            .Options;
-
-        await using (var db = new ApplicationDbContext(options))
-        {
-            await db.Database.EnsureCreatedAsync();
-        }
-
-        var factory = new TestDbContextFactory(options);
-        var sut = new GroupRuleService(factory);
+        var sut = new GroupRuleService(db.Factory);
 
         var first = await sut.CreateAsync(new GroupRule { Name = "First", Color = "red", Prefixes = ["a_"] });
         var second = await sut.CreateAsync(new GroupRule { Name = "Second", Color = "blue", Prefixes = ["b_"] });
