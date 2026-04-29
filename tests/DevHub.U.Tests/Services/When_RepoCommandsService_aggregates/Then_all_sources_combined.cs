@@ -1,12 +1,10 @@
-using DevHub.Data;
 using DevHub.Models;
 using DevHub.Services;
 using DevHub.U.Tests.Helpers;
-using Microsoft.EntityFrameworkCore;
 
 namespace DevHub.U.Tests.Services.When_RepoCommandsService_aggregates;
 
-public class Then_all_sources_combined
+public class Then_all_sources_combined(DbFixture db) : IClassFixture<DbFixture>
 {
     [Fact]
     public async Task Execute()
@@ -17,15 +15,10 @@ public class Then_all_sources_combined
         await File.WriteAllTextAsync(Path.Combine(dir, "package.json"),
             """{"scripts":{"e2e":"cypress run"}}""");
 
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-        var factory = new TestDbContextFactory(options);
-
         var sut = new RepoCommandsService(
             new ProjectTypeDetector(),
             new PackageJsonReader(),
-            new HiddenCommandService(factory));
+            new HiddenCommandService(db.Factory));
 
         var commands = await sut.GetAutoCommandsAsync(dir);
 
