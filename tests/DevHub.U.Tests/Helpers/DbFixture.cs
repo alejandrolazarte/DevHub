@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DevHub.U.Tests.Helpers;
 
-public sealed class DbFixture : IAsyncLifetime
+public sealed class DbFixture : IAsyncLifetime, IDisposable
 {
     private SqliteConnection? _connection;
 
@@ -28,6 +28,13 @@ public sealed class DbFixture : IAsyncLifetime
     public async Task DisposeAsync()
     {
         if (_connection is not null)
+        {
             await _connection.DisposeAsync();
+        }
+    }
+
+    public void Dispose()
+    {
+        _connection?.Dispose();
     }
 }
