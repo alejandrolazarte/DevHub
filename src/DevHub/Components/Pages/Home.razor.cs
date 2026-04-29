@@ -83,7 +83,9 @@ public partial class Home : IDisposable
     {
         var path = await OpenFolderPickerAsync();
         if (path is null)
+        {
             return;
+        }
 
         _catalogBusy = true;
         try
@@ -105,7 +107,9 @@ public partial class Home : IDisposable
     {
         var path = await OpenFolderPickerAsync();
         if (path is null)
+        {
             return;
+        }
 
         _catalogBusy = true;
         try

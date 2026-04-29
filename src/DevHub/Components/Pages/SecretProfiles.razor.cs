@@ -45,7 +45,9 @@ public partial class SecretProfiles
         };
         var name = await DialogService.ShowAndGetAsync<PromptDialog, string>("Capturar", parameters);
         if (string.IsNullOrWhiteSpace(name))
+        {
             return;
+        }
 
         if (await Snackbar.TryAsync(
             () => ProfileService.CaptureAsync(serviceName, name, CancellationToken.None),
@@ -93,7 +95,9 @@ public partial class SecretProfiles
             CancelText = "Cancelar",
         });
         if (ok != true)
+        {
             return;
+        }
 
         if (await Snackbar.TryAsync(
             () => ProfileService.DeleteAsync(serviceName, profileName, CancellationToken.None),

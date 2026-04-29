@@ -14,7 +14,9 @@ internal static class SnackbarExtensions
         {
             await operation();
             if (successMessage is not null)
+            {
                 snackbar.Add(successMessage, successSeverity);
+            }
             return true;
         }
         catch (Exception ex)

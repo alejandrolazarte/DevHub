@@ -47,7 +47,9 @@ public partial class Settings
             { x => x.Rule, new GroupRule() }
         };
         if (await DialogService.ShowAndWaitAsync<GroupRuleDialog>("Add Rule", parameters))
+        {
             await LoadGroupRulesAsync();
+        }
     }
 
     private async Task OpenEditDialog(GroupRule rule)
@@ -57,7 +59,9 @@ public partial class Settings
             { x => x.Rule, rule }
         };
         if (await DialogService.ShowAndWaitAsync<GroupRuleDialog>("Edit Rule", parameters))
+        {
             await LoadGroupRulesAsync();
+        }
     }
 
     private async Task DeleteRuleAsync(int id)
@@ -73,7 +77,9 @@ public partial class Settings
     private async Task MoveSelectedUpAsync()
     {
         if (_selectedRules.Count == 0)
+        {
             return;
+        }
 
         var orderedIds = _groupRules
             .OrderBy(r => r.Order)
@@ -81,7 +87,9 @@ public partial class Settings
             .ToList();
         var firstSelected = orderedIds.IndexOf(_selectedRules.First().Id);
         if (firstSelected <= 0)
+        {
             return;
+        }
 
         (orderedIds[firstSelected - 1], orderedIds[firstSelected]) = (orderedIds[firstSelected], orderedIds[firstSelected - 1]);
         await GroupRuleService.ReorderAsync([.. orderedIds]);
@@ -91,7 +99,9 @@ public partial class Settings
     private async Task MoveSelectedDownAsync()
     {
         if (_selectedRules.Count == 0)
+        {
             return;
+        }
 
         var orderedIds = _groupRules
             .OrderBy(r => r.Order)
@@ -99,7 +109,9 @@ public partial class Settings
             .ToList();
         var lastSelected = orderedIds.IndexOf(_selectedRules.Last().Id);
         if (lastSelected >= orderedIds.Count - 1)
+        {
             return;
+        }
 
         (orderedIds[lastSelected], orderedIds[lastSelected + 1]) = (orderedIds[lastSelected + 1], orderedIds[lastSelected]);
         await GroupRuleService.ReorderAsync([.. orderedIds]);
