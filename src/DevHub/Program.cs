@@ -61,6 +61,7 @@ builder.Services.Configure<SecretProfileOptions>(
 builder.Services.AddSingleton<IFileSystem, FileSystem>();
 builder.Services.AddSingleton<SecretProfileService>();
 
+builder.Services.AddSingleton<IRipgrepResolverService, RipgrepResolverService>();
 builder.Services.AddSingleton<ICanvasRipgrepService, CanvasRipgrepService>();
 builder.Services.AddSingleton<ICanvasService, EfCanvasService>();
 builder.Services.AddSingleton<CanvasVsCodeService>();

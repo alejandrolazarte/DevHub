@@ -5,6 +5,7 @@ namespace DevHub.Services;
 
 public partial class CanvasRipgrepService(
     IProcessRunner runner,
+    IRipgrepResolverService rgResolver,
     ILogger<CanvasRipgrepService> logger) : ICanvasRipgrepService
 {
     private static readonly SemaphoreSlim _concurrency = new(8, 8);
@@ -16,7 +17,8 @@ public partial class CanvasRipgrepService(
             return new SymbolSearchResult(term, []);
         }
 
-        var tasks = repoPaths.Select(p => SearchRepoAsync(term, p, ct));
+        var rgPath = await rgResolver.GetRgPathAsync(ct);
+        var tasks = repoPaths.Select(p => SearchRepoAsync(term, rgPath, p, ct));
         var results = await Task.WhenAll(tasks);
         var matches = results.SelectMany(r => r).ToList();
         LogSearchComplete(logger, term, matches.Count);
@@ -42,13 +44,13 @@ public partial class CanvasRipgrepService(
         }
     }
 
-    private async Task<IEnumerable<SymbolMatch>> SearchRepoAsync(string term, string repoPath, CancellationToken ct)
+    private async Task<IEnumerable<SymbolMatch>> SearchRepoAsync(string term, string rgPath, string repoPath, CancellationToken ct)
     {
         await _concurrency.WaitAsync(ct);
         try
         {
             var result = await runner.RunAsync(
-                "rg",
+                rgPath,
                 $"--line-number --no-heading --glob \"*.cs\" --glob \"*.ts\" --glob \"*.tsx\" -- \"{EscapeArg(term)}\"",
                 repoPath,
                 ct);

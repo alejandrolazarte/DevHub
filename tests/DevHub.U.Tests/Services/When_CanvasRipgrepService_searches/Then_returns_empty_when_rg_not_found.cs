@@ -15,7 +15,10 @@ public class Then_returns_empty_when_rg_not_found
             .Setup(r => r.RunAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new System.ComponentModel.Win32Exception("No such file or directory"));
 
-        var sut = new CanvasRipgrepService(runner.Object, NullLogger<CanvasRipgrepService>.Instance);
+        var resolver = new Mock<IRipgrepResolverService>();
+        resolver.Setup(r => r.GetRgPathAsync(It.IsAny<CancellationToken>())).ReturnsAsync("rg");
+
+        var sut = new CanvasRipgrepService(runner.Object, resolver.Object, NullLogger<CanvasRipgrepService>.Instance);
         var dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
         Directory.CreateDirectory(dir);
 

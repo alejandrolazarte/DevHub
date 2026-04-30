@@ -52,7 +52,7 @@ public static class SymbolClassifier
         (R($@"\binterface\s+{t}\b"), SymbolRole.DefineInterface),
         (R($@"\b\w[\w<>\[\]?,\s]*\s+{t}\s*\("), SymbolRole.DefineMethod),
         (R($@"\b\w[\w<>\[\]?,\s]*\s+{t}\s*(=>|\{{)"), SymbolRole.DefineProperty),
-        (R($@":\s*[^{{]*\b{t}\b"), SymbolRole.Implements),
+        (R($@"\b(class|interface|record|struct)\b[^{{:]*:\s*[^{{]*\b{t}\b"), SymbolRole.Implements),
         (R($@"\bnew\s+{t}\s*[<({{]"), SymbolRole.UsesInstance),
         (R($@"\b{t}\s+\w+"), SymbolRole.UsesParameter),
     ];

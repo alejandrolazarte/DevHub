@@ -9,8 +9,8 @@ public class Then_unmatched_line_returns_null
     public async Task Execute()
     {
         await Task.CompletedTask;
-        // A comment line containing the term — no role pattern matches
-        var result = SymbolClassifier.Classify("Foo.cs", "// TODO: refactor IOrderService later", "IOrderService");
+        // Term appears at end of a comment with no following word — no pattern matches
+        var result = SymbolClassifier.Classify("Foo.cs", "// This component depends on IOrderService", "IOrderService");
 
         result.ShouldBeNull();
     }
