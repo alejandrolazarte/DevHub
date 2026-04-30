@@ -98,8 +98,9 @@ window.canvasInterop = (function () {
 
             cy.on('tap', 'node', function (evt) {
                 const id = evt.target.data('id');
+                const label = evt.target.data('label') ?? id;
                 if (dotNetRef) {
-                    dotNetRef.invokeMethodAsync('OnNodeClicked', id);
+                    dotNetRef.invokeMethodAsync('OnNodeClicked', id, label);
                 }
             });
 
