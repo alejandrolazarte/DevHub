@@ -145,6 +145,22 @@ window.canvasInterop = (function () {
             if (cy) cy.fit();
         },
 
+        getNodePositions(containerId) {
+            if (!cy) return [];
+            const container = document.getElementById(containerId);
+            if (!container) return [];
+            const rect = container.getBoundingClientRect();
+            return cy.nodes().map(n => {
+                const bb = n.renderedBoundingBox();
+                return {
+                    id: n.data('id'),
+                    label: n.data('label'),
+                    x: rect.left + (bb.x1 + bb.x2) / 2,
+                    y: rect.top + (bb.y1 + bb.y2) / 2
+                };
+            });
+        },
+
         destroy() {
             if (cy) {
                 cy.destroy();
