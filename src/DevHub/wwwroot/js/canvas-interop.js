@@ -93,6 +93,7 @@ window.canvasInterop = (function () {
                 ],
                 layout: { name: 'cose', padding: 40, nodeRepulsion: 8000 },
                 wheelSensitivity: 0.3,
+                maxZoom: 2,
             });
 
             cy.on('tap', 'node', function (evt) {
@@ -114,7 +115,11 @@ window.canvasInterop = (function () {
             const elements = JSON.parse(elementsJson);
             cy.elements().remove();
             cy.add(elements);
-            cy.layout({ name: 'cose', padding: 40, nodeRepulsion: 8000 }).run();
+            const layout = cy.layout({ name: 'cose', padding: 40, nodeRepulsion: 8000 });
+            layout.on('layoutstop', () => {
+                if (cy.zoom() > 1.5) { cy.zoom(1.5); cy.center(); }
+            });
+            layout.run();
         },
 
         getGraph() {
