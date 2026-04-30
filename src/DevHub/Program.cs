@@ -61,6 +61,10 @@ builder.Services.Configure<SecretProfileOptions>(
 builder.Services.AddSingleton<IFileSystem, FileSystem>();
 builder.Services.AddSingleton<SecretProfileService>();
 
+builder.Services.AddSingleton<ICanvasRipgrepService, CanvasRipgrepService>();
+builder.Services.AddSingleton<ICanvasService, EfCanvasService>();
+builder.Services.AddSingleton<CanvasVsCodeService>();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())

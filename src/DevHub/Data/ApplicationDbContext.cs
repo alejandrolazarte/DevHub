@@ -11,6 +11,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<GroupRule> GroupRules => Set<GroupRule>();
     public DbSet<CustomRepoCommand> CustomRepoCommands => Set<CustomRepoCommand>();
     public DbSet<HiddenAutoCommand> HiddenAutoCommands => Set<HiddenAutoCommand>();
+    public DbSet<CanvasBoard> Canvases => Set<CanvasBoard>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -54,6 +55,14 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             e.Property(h => h.RepoPath).HasMaxLength(1024).IsRequired();
             e.Property(h => h.Name).HasMaxLength(256).IsRequired();
             e.HasIndex(h => new { h.RepoPath, h.Name }).IsUnique();
+        });
+
+        modelBuilder.Entity<CanvasBoard>(e =>
+        {
+            e.HasKey(c => c.Id);
+            e.Property(c => c.Name).HasMaxLength(256).IsRequired();
+            e.Property(c => c.CytoscapeJson).HasColumnType("TEXT").IsRequired();
+            e.HasIndex(c => c.Name).IsUnique();
         });
     }
 }

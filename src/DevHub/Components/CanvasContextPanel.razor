@@ -1,0 +1,55 @@
+@using DevHub.Models
+@using DevHub.Services
+
+<MudStack Spacing="2">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+        <MudText Typo="Typo.subtitle2" Color="Color.Primary">@RepoName</MudText>
+        <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small" OnClick="OnClose" />
+    </MudStack>
+
+    <MudText Typo="Typo.caption" Style="color: var(--mud-palette-text-secondary)">
+        @Matches.Count match@(Matches.Count == 1 ? "" : "es") encontrado@(Matches.Count == 1 ? "" : "s")
+    </MudText>
+
+    @foreach (var match in Matches)
+    {
+        <MudPaper Outlined="true" Class="pa-2" Style="@MatchStyle(match)">
+            <MudStack Spacing="1" @onclick="() => SelectMatch(match)">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                    <MudChip T="string" Size="Size.Small" Color="@RoleColor(match.Role)" Variant="Variant.Filled">
+                        @RoleLabel(match.Language, match.Role)
+                    </MudChip>
+                    <MudText Typo="Typo.caption" Style="color: var(--mud-palette-text-secondary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                        @ShortPath(match.FilePath):@match.LineNumber
+                    </MudText>
+                </MudStack>
+                <MudText Typo="Typo.caption" Style="font-family:monospace; white-space:pre; overflow:hidden; text-overflow:ellipsis;">
+                    @match.LineText.Trim()
+                </MudText>
+            </MudStack>
+        </MudPaper>
+    }
+
+    @if (_selected is not null && _context is not null)
+    {
+        <MudDivider />
+        <MudText Typo="Typo.caption" Color="Color.Primary">Contexto</MudText>
+        <MudPaper Outlined="true" Class="pa-2">
+            <pre style="font-size:11px; margin:0; overflow-x:auto;">@foreach (var line in _context.Lines)
+            {<span style="@(line.IsFocus ? "background:#7c3aed33; display:block;" : "display:block;")"><span style="color:#475569; user-select:none;">@line.LineNumber.ToString().PadLeft(4) </span>@line.Text</span>}</pre>
+        </MudPaper>
+
+        <MudStack Row="true" Spacing="1">
+            <MudButton StartIcon="@Icons.Material.Filled.OpenInNew" Size="Size.Small"
+                       Variant="Variant.Outlined" Color="Color.Primary"
+                       OnClick="GoToFile">
+                Go to file
+            </MudButton>
+            <MudButton StartIcon="@Icons.Material.Filled.Search" Size="Size.Small"
+                       Variant="Variant.Outlined" Color="Color.Secondary"
+                       OnClick="SeeReferences">
+                Ver referencias
+            </MudButton>
+        </MudStack>
+    }
+</MudStack>
