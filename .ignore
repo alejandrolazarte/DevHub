@@ -1,0 +1,10 @@
+# Excluded from automatic searches (Claude Code / ripgrep)
+# Binary artifacts
+*.dll
+*.exe
+*.pdb
+node_modules/
+
+# Documentation - read only when explicitly requested
+docs/
+specs/

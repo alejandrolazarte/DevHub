@@ -1,0 +1,112 @@
+@page "/canvas"
+@rendermode InteractiveServer
+@using DevHub.Models
+
+<PageTitle>Canvas — DevHub</PageTitle>
+
+<MudStack Spacing="2" Style="height: calc(100vh - 80px);">
+
+    @* ── Top bar ── *@
+    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Wrap="Wrap.Wrap">
+
+        @* Canvas selector *@
+        <MudSelect T="int?" Value="_activeCanvasId" ValueChanged="OnCanvasSelected"
+                   Placeholder="Sin canvas" Dense="true" Style="min-width:180px;" Margin="Margin.Dense">
+            @foreach (var c in _savedCanvases)
+            {
+                <MudSelectItem T="int?" Value="c.Id">@c.Name</MudSelectItem>
+            }
+        </MudSelect>
+
+        <MudTooltip Text="Nuevo canvas">
+            <MudIconButton Icon="@Icons.Material.Filled.AddBox" Color="Color.Primary"
+                           OnClick="CreateCanvas" Size="Size.Small" />
+        </MudTooltip>
+
+        <MudTooltip Text="Guardar">
+            <MudIconButton Icon="@Icons.Material.Filled.Save" Color="Color.Secondary"
+                           OnClick="SaveCanvas" Disabled="_activeCanvasId is null" Size="Size.Small" />
+        </MudTooltip>
+
+        <MudTooltip Text="Agregar nota">
+            <MudIconButton Icon="@Icons.Material.Filled.NoteAdd" OnClick="AddLabelNode" Size="Size.Small" />
+        </MudTooltip>
+
+        <MudTooltip Text="Fit">
+            <MudIconButton Icon="@Icons.Material.Filled.FitScreen" OnClick="FitAll" Size="Size.Small" />
+        </MudTooltip>
+
+        <MudSpacer />
+
+        @* Search *@
+        <MudTextField @bind-Value="_searchTerm"
+                      Placeholder="Buscar símbolo o string…"
+                      Adornment="Adornment.End"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      OnAdornmentClick="RunSearch"
+                      OnKeyUp="OnSearchKeyUp"
+                      Immediate="true"
+                      Style="min-width:260px;"
+                      Margin="Margin.Dense"
+                      Variant="Variant.Outlined" />
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                   OnClick="RunSearch" Disabled="_isSearching">
+            @if (_isSearching)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-1" />
+                <span>Buscando…</span>
+            }
+            else
+            {
+                <span>Buscar</span>
+            }
+        </MudButton>
+    </MudStack>
+
+    @* ── Canvas + panel ── *@
+    <MudStack Row="true" Spacing="0" Style="flex:1; min-height:0; overflow:hidden;">
+
+        @* Cytoscape container *@
+        <div id="cy-container" style="flex:1; background:#0d1117; border-radius:8px; position:relative;">
+            @if (_lastResult is not null && _lastResult.Matches.Count == 0 && !_isSearching)
+            {
+                <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none;">
+                    <MudText Typo="Typo.body2" Style="color:#475569;">
+                        Sin resultados para "@_lastResult.Term"
+                    </MudText>
+                </div>
+            }
+            @if (_lastResult is null && !_isSearching)
+            {
+                <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; flex-direction:column; gap:8px;">
+                    <MudIcon Icon="@Icons.Material.Filled.AccountTree" Style="font-size:48px; color:#1e293b;" />
+                    <MudText Typo="Typo.body2" Style="color:#334155;">
+                        Buscá un símbolo para poblar el canvas
+                    </MudText>
+                </div>
+            }
+        </div>
+
+        @* Context panel *@
+        @if (_panelRepoPath is not null)
+        {
+            <MudPaper Outlined="true" Class="ml-2 pa-3" Style="width:340px; overflow-y:auto; flex-shrink:0;">
+                <CanvasContextPanel RepoName="@_panelRepoName"
+                                    Matches="_panelMatches"
+                                    OnSeeReferences="OnSeeReferences"
+                                    OnClose="ClosePanel" />
+            </MudPaper>
+        }
+    </MudStack>
+
+    @* Status bar *@
+    @if (_lastResult is not null)
+    {
+        <MudText Typo="Typo.caption" Style="color: var(--mud-palette-text-secondary);">
+            "@_lastResult.Term" — @_lastResult.Matches.Count match@(_lastResult.Matches.Count == 1 ? "" : "es")
+            en @_lastResult.Matches.Select(m => m.RepoPath).Distinct().Count() repo@(_lastResult.Matches.Select(m => m.RepoPath).Distinct().Count() == 1 ? "" : "s")
+        </MudText>
+    }
+
+</MudStack>

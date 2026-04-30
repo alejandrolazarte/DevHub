@@ -13,7 +13,7 @@ namespace DevHub.Migrations
             migrationBuilder.AddColumn<string>(
                 name: "Icon",
                 table: "CustomRepoCommands",
-                type: "nvarchar(max)",
+                type: "TEXT",
                 nullable: false,
                 defaultValue: "terminal");
         }
