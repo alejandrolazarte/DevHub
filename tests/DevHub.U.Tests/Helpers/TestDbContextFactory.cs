@@ -1,10 +1,28 @@
 using DevHub.Data;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 namespace DevHub.U.Tests.Helpers;
 
-public sealed class TestDbContextFactory(DbContextOptions<ApplicationDbContext> options)
-    : IDbContextFactory<ApplicationDbContext>
+internal sealed class TestDbContextFactory : IDbContextFactory<ApplicationDbContext>, IDisposable
 {
-    public ApplicationDbContext CreateDbContext() => new(options);
+    private readonly SqliteConnection _connection;
+    private readonly DbContextOptions<ApplicationDbContext> _options;
+
+    public TestDbContextFactory()
+    {
+        _connection = new SqliteConnection("DataSource=:memory:");
+        _connection.Open();
+
+        _options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseSqlite(_connection)
+            .Options;
+
+        using var db = new ApplicationDbContext(_options);
+        db.Database.EnsureCreated();
+    }
+
+    public ApplicationDbContext CreateDbContext() => new(_options);
+
+    public void Dispose() => _connection.Dispose();
 }

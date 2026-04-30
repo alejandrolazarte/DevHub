@@ -15,6 +15,7 @@ public partial class InteractiveConsole : IDisposable
     [Inject] FolderPickerService FolderPicker { get; set; } = default!;
 
     [Parameter] public string? RepoPath { get; set; }
+    [Parameter] public EventCallback OnSessionChanged { get; set; }
 
     private ShellSession? _session;
     private string _currentPath = string.Empty;
@@ -42,7 +43,18 @@ public partial class InteractiveConsole : IDisposable
 
     protected override async Task OnParametersSetAsync()
     {
-        if (string.IsNullOrEmpty(RepoPath) || RepoPath == _currentPath)
+        if (string.IsNullOrEmpty(RepoPath))
+        {
+            if (_session is not null)
+            {
+                DetachSession();
+                _currentPath = string.Empty;
+                await InvokeAsync(StateHasChanged);
+            }
+            return;
+        }
+
+        if (RepoPath == _currentPath)
         {
             return;
         }
@@ -141,20 +153,11 @@ public partial class InteractiveConsole : IDisposable
 
     // ── Shell lifecycle ───────────────────────────────────────────────────────
 
-    private async Task ToggleShellAsync()
+    public async Task KillShellAsync()
     {
-        if (_session?.HasExited == true)
-        {
-            DetachSession();
-            Sessions.Kill(_currentPath);
-            await AttachSessionAsync(_currentPath);
-        }
-        else
-        {
-            Sessions.Kill(_currentPath);
-            DetachSession();
-            await InvokeAsync(StateHasChanged);
-        }
+        Sessions.Kill(_currentPath);
+        DetachSession();
+        await InvokeAsync(StateHasChanged);
     }
 
     private void ClearConsole()
@@ -223,6 +226,7 @@ public partial class InteractiveConsole : IDisposable
         try
         {
             await InvokeAsync(StateHasChanged);
+            await OnSessionChanged.InvokeAsync();
         }
         catch (ObjectDisposedException) { }
         catch (InvalidOperationException) { }

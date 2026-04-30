@@ -19,6 +19,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="AutoFixture" />
+    <PackageReference Include="AutoFixture.AutoMoq" />
+    <PackageReference Include="AutoFixture.Xunit2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,6 +30,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\DevHub\DevHub.csproj" />
+    <ProjectReference Include="..\..\src\DevHub.Analyzers\DevHub.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>

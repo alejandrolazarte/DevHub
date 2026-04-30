@@ -45,7 +45,10 @@
         </MudNavMenu>
     </MudDrawer>
 
-    <MudMainContent Class="pa-4">
-        @Body
+    <MudMainContent Class="pa-4" Style="display:flex; flex-direction:column; height:100vh; box-sizing:border-box; overflow:hidden">
+        <div style="flex:1; overflow-y:auto; min-height:0">
+            @Body
+        </div>
+        <BottomTerminalPanel />
     </MudMainContent>
 </MudLayout>

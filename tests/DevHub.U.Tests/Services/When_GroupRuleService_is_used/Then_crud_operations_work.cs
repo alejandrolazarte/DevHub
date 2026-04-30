@@ -2,6 +2,7 @@ using DevHub.Models;
 using DevHub.Services;
 using DevHub.U.Tests.Helpers;
 using Shouldly;
+using AutoFixture;
 
 namespace DevHub.U.Tests.Services.When_GroupRuleService_is_used;
 
@@ -12,7 +13,9 @@ public class Then_create_adds_rule_with_order(DbFixture db) : IClassFixture<DbFi
     {
         var sut = new GroupRuleService(db.Factory);
 
-        var result = await sut.CreateAsync(new GroupRule { Name = "Test", Color = "primary", Prefixes = ["fw_"] });
+        var fixture = new AutoFixture.Fixture();
+        var rule = fixture.Build<GroupRule>().With(r => r.Name, "Test").With(r => r.Color, "primary").With(r => r.Prefixes, new List<string> { "fw_" }).Create();
+        var result = await sut.CreateAsync(rule);
 
         result.Id.ShouldNotBe(0);
         result.Order.ShouldBe(0);

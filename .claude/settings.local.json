@@ -2,7 +2,15 @@
   "permissions": {
     "allow": [
       "Bash(dotnet ef *)",
-      "Bash(rtk read *)"
+      "Bash(rtk read *)",
+      "Bash(rtk git *)",
+      "Bash(rtk dotnet *)",
+      "Bash(dotnet add *)",
+      "Bash(dotnet package *)",
+      "Bash(dotnet test *)",
+      "Bash(rtk grep *)",
+      "Bash(gh copilot *)",
+      "Bash(copilot)"
     ]
   }
 }

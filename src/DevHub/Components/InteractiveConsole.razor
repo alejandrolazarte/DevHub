@@ -8,17 +8,7 @@
     @* ── Toolbar ── *@
     <div style="display:flex; align-items:center; gap:4px; padding:4px 8px; background:#0d0d18; border-bottom:1px solid #1a1a2e; flex-shrink:0; min-height:36px">
 
-        @if (_session is not null)
-        {
-            <MudTooltip Text="@(_session.HasExited ? "Reiniciar shell" : "Matar shell")">
-                <MudIconButton Icon="@(_session.HasExited ? Icons.Material.Filled.RestartAlt : Icons.Material.Filled.Stop)"
-                               Color="@(_session.HasExited ? Color.Warning : Color.Error)"
-                               Size="Size.Small"
-                               OnClick="ToggleShellAsync" />
-            </MudTooltip>
-        }
-
-        <MudTooltip Text="@_currentPath" Placement="Placement.Bottom">
+            <MudTooltip Text="@_currentPath" Placement="Placement.Bottom">
             <MudButton Size="Size.Small"
                        StartIcon="@Icons.Material.Filled.FolderOpen"
                        Color="Color.Default"
