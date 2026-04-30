@@ -13,19 +13,7 @@ public class Then_import_from_root_adds_git_repos_only
     [Fact]
     public async Task Then_import_from_root_adds_git_repos_only_Run()
     {
-        using var connection = new SqliteConnection("Data Source=:memory:");
-        await connection.OpenAsync();
-
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseSqlite(connection)
-            .Options;
-
-        await using (var db = new ApplicationDbContext(options))
-        {
-            await db.Database.EnsureCreatedAsync();
-        }
-
-        var factory = new TestDbContextFactory(options);
+        var factory = TestDatabaseHelper.CreateInMemoryFactory();
         var sut = new EfRepoCatalogService(factory, NullLogger<EfRepoCatalogService>.Instance);
 
         var tempRoot = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));

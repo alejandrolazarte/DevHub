@@ -13,19 +13,7 @@ public class Then_import_returns_zero_for_nonexistent_path
     [Fact]
     public async Task Execute()
     {
-        using var connection = new SqliteConnection("Data Source=:memory:");
-        await connection.OpenAsync();
-
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseSqlite(connection)
-            .Options;
-
-        await using (var db = new ApplicationDbContext(options))
-        {
-            await db.Database.EnsureCreatedAsync();
-        }
-
-        var factory = new TestDbContextFactory(options);
+        var factory = TestDatabaseHelper.CreateInMemoryFactory();
         var sut = new EfRepoCatalogService(factory, NullLogger<EfRepoCatalogService>.Instance);
 
         var result = await sut.ImportFromRootAsync("/does/not/exist/anywhere");

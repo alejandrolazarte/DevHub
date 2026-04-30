@@ -13,19 +13,7 @@ public class Then_add_persists_repo_path
     [Fact]
     public async Task Then_add_persists_repo_path_Run()
     {
-        using var connection = new SqliteConnection("Data Source=:memory:");
-        await connection.OpenAsync();
-
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseSqlite(connection)
-            .Options;
-
-        await using (var db = new ApplicationDbContext(options))
-        {
-            await db.Database.EnsureCreatedAsync();
-        }
-
-        var factory = new TestDbContextFactory(options);
+        var factory = TestDatabaseHelper.CreateInMemoryFactory();
         var sut = new EfRepoCatalogService(factory, NullLogger<EfRepoCatalogService>.Instance);
 
         using var repo = new TempGitRepo();

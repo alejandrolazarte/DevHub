@@ -17,8 +17,7 @@ public partial class Home : IDisposable
     private IReadOnlyList<RepoInfo> _selectedRepos = [];
     private IReadOnlyList<string> _allGroups = [];
 
-    private RepoTerminalPanel _terminalPanel = default!;
-
+    [Inject] TerminalPanelService TerminalPanel { get; set; } = default!;
     [Inject] IDialogService DialogService { get; set; } = default!;
 
     protected override void OnInitialized()
@@ -149,8 +148,11 @@ public partial class Home : IDisposable
         await ManualRefresh();
     }
 
-    private Task OpenTerminalAsync(RepoInfo repo) =>
-        _terminalPanel.OpenForRepoAsync(repo);
+    private Task OpenTerminalAsync(RepoInfo repo)
+    {
+        TerminalPanel.OpenForRepo(repo);
+        return Task.CompletedTask;
+    }
 
     private void OnSelectAllChanged(bool selectAll)
     {

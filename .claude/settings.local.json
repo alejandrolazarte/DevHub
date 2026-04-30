@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rtk git *)",
+      "Bash(rtk dotnet *)",
+      "Bash(dotnet add *)",
+      "Bash(dotnet package *)",
+      "Bash(dotnet test *)",
+      "Bash(rtk grep *)",
+      "Bash(gh copilot *)",
+      "Bash(copilot)"
+    ]
+  }
+}
