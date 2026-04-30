@@ -144,7 +144,7 @@ public partial class Canvas : IAsyncDisposable
     }
 
     [JSInvokable]
-    public Task OnNodeClicked(string repoPath)
+    public Task OnNodeClicked(string repoPath, string label = "")
     {
         if (string.IsNullOrEmpty(repoPath))
         {
@@ -152,14 +152,11 @@ public partial class Canvas : IAsyncDisposable
             return Task.CompletedTask;
         }
 
-        if (_lastResult is null)
-        {
-            return Task.CompletedTask;
-        }
-
-        var matches = _lastResult.Matches.Where(m => m.RepoPath == repoPath).ToList();
+        var matches = _lastResult?.Matches.Where(m => m.RepoPath == repoPath).ToList()
+                      ?? [];
         _panelRepoPath = repoPath;
-        _panelRepoName = matches.FirstOrDefault()?.RepoName ?? Path.GetFileName(repoPath);
+        _panelRepoName = matches.FirstOrDefault()?.RepoName
+                         ?? (string.IsNullOrEmpty(label) ? Path.GetFileName(repoPath) : label);
         _panelMatches = matches;
         StateHasChanged();
         return Task.CompletedTask;
